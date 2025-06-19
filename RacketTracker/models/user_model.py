@@ -5,8 +5,8 @@ import os
 from flask_login import UserMixin
 from sqlalchemy.exc import IntegrityError
 
-from coach_peter.db import db
-from coach_peter.utils.logger import configure_logger
+from RacketTracker.db import db
+from RacketTracker.utils.logger import configure_logger
 
 
 logger = logging.getLogger(__name__)

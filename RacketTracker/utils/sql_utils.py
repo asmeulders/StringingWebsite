@@ -3,7 +3,7 @@ import logging
 import os
 import sqlite3
 
-from coach_peter.utils.logger import configure_logger
+from RacketTracker.utils.logger import configure_logger
 
 
 logger = logging.getLogger(__name__)

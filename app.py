@@ -5,7 +5,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from config import ProductionConfig
 
 from RacketTracker.db import db
-from RacketTracker.models.goal_model import Goals
+from RacketTracker.models.order_model import Orders
 from RacketTracker.models.user_model import Users
 from RacketTracker.utils.logger import configure_logger
 

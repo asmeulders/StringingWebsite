@@ -13,8 +13,10 @@ CREATE TABLE orders (
     date DATE NOT NULL,
     mains_tension INTEGER NOT NULL,
     crosses_tension INTEGER NOT NULL DEFAULT(mains_tension),
-    mains_string_id INTEGER NOT NULL FOREIGN KEY,
+    mains_string_id INTEGER NOT NULL,
     crosses_string_id INTEGER DEFAULT(mains_string_id),
+    paid BOOLEAN DEFAULT(false),
+    completed BOOLEAN DEFAULT(false),
     CONSTRAINT customer_id FOREIGN KEY (customer_id)
     REFERENCES customers(customer_id),
     CONSTRAINT racket_id FOREIGN KEY (racket_id)
