@@ -77,16 +77,16 @@ class Rackets(Base):
         Creates a new racket in the rackets table using SQLAlchemy.
 
         Args:
-            brand (int): Brand of the racket.
-            model (int): Model of the racket.
-            year (date): Release year of the racket.
+            brand (str): Brand of the racket.
+            model (str): Model of the racket.
+            year (int): Release year of the racket.
             head_size (int): Head size of the racket.
             grip_size (float): Grip size of the racket.
             weight (int): Weight of the racket (grams).
             stringing_pattern (str): Stringing pattern of the racket.
-            swing_weight (float): Swing weight of the racket.
-            balance (float): Balance point of the racket.
-            stiffness (int): Stiffness of the racket
+            swing_weight (float, optional): Swing weight of the racket.
+            balance (float, optional): Balance point of the racket.
+            stiffness (int, optional): Stiffness of the racket
 
         Raises:
             ValueError: If any field is invalid. 
@@ -228,7 +228,7 @@ class Rackets(Base):
                 for racket in rackets
             ]
 
-            logger.info(f"Retrieved {len(results)} racket from the database")
+            logger.info(f"Retrieved {len(results)} rackets from the database")
             return results
 
         except SQLAlchemyError as e:
@@ -270,10 +270,10 @@ class Rackets(Base):
             stiffness (int, optional): The new stiffness value.
 
         Returns:
-            Goals: The updated goal instance.
+            Rackets: The updated racket instance.
 
         Raises:
-            ValueError: If the goal with the given ID does not exist or inputs are invalid.
+            ValueError: If the racket with the given ID does not exist or inputs are invalid.
             SQLAlchemyError: If a database error occurs.
         """
         logger.info(f"Attempting to update racket with ID {racket_id}")
@@ -282,8 +282,8 @@ class Rackets(Base):
             racket = cls.query.get(racket_id)
 
             if not racket:
-                logger.warning(f"racket with ID {racket_id} not found.")
-                raise ValueError(f"racket with ID {racket_id} not found.")
+                logger.warning(f"Racket with ID {racket_id} not found.")
+                raise ValueError(f"Racket with ID {racket_id} not found.")
 
             # Update only provided fields
             if brand is not None:

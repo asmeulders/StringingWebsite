@@ -78,10 +78,10 @@ class Orders(Base):
             racket_id (int): Foreign key of the racket provided.
             date (date): Date of the order.
             mains_tension (int): Tension of the mains.
-            crosses_tension (int): Tension of the crosses.
+            crosses_tension (int, optional): Tension of the crosses.
             mains_string_id (int): Foreign key of the string used on the mains.
-            crosses_string_id (int): Foreign key of the string used on the crosses.
-            paid (bool): True if paid for by customer.
+            crosses_string_id (int, optional): Foreign key of the string used on the crosses.
+            paid (bool, optional): True if paid for by customer.
 
         Raises:
             ValueError: If any field is invalid. 
@@ -495,7 +495,7 @@ class Orders(Base):
                 for order in orders
             ]
 
-            logger.info(f"Retrieved {len(results)} order from the database")
+            logger.info(f"Retrieved {len(results)} orders from the database")
             return results
 
         except SQLAlchemyError as e:
@@ -533,10 +533,10 @@ class Orders(Base):
             completed (bool, optional): The new completion status.
 
         Returns:
-            Goals: The updated goal instance.
+            Orders: The updated order instance.
 
         Raises:
-            ValueError: If the goal with the given ID does not exist or inputs are invalid.
+            ValueError: If the order with the given ID does not exist or inputs are invalid.
             SQLAlchemyError: If a database error occurs.
         """
         logger.info(f"Attempting to update order with ID {order_id}")
