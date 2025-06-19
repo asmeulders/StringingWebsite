@@ -33,9 +33,9 @@ class Orders(Base):
     mains_tension = mapped_column(Integer, nullable=False)
     crosses_tension = mapped_column(Integer, nullable=False, default=mains_tension)
     mains_string_id = mapped_column(Integer, ForeignKey('strings.string_id'))
-    mains_string_id = mapped_column(Integer, ForeignKey('strings.string_id'), default=mains_string_id)
+    crosses_string_id = mapped_column(Integer, ForeignKey('strings.string_id'), default=mains_string_id)
     paid = mapped_column(Boolean, default=False)
-    compmleted = mapped_column(Boolean, default=False)
+    completed = mapped_column(Boolean, default=False)
 
     def validate(self) -> None:
         """Validates the order instance before committing to the database.
@@ -49,24 +49,24 @@ class Orders(Base):
         # if self.recurring is not None and (not isinstance(self.recurring, str) or not self.recurring.strip()):
         #     raise ValueError("Recurring goal must be a non-empty string if provided.")
         
-        if not self.target or not isinstance(self.target, str):
-            raise ValueError("Target must be a non-empty string")
-        if not self.goal_value or not isinstance(self.goal_value, int):
-            raise ValueError("Goal value must be a valid integer.")
-        if self.goal_progress is not None and not isinstance(self.goal_progress, (float, int)):
-            raise ValueError("Goal progress must be a valid float or int.")
+        if not self.customer_id or not isinstance(self.customer_id, int):
+            raise ValueError("customer_id must be a valid integer")
+        if not self.racket_id or not isinstance(self.racket_id, int):
+            raise ValueError("racket_id must be a valid integer.")
+        if not self.date and not isinstance(self.date, Date):
+            raise ValueError("date must be a Date object.")
+        if not self.mains_tension and not isinstance(self.mains_tension, int):
+            raise ValueError("mains_tension must be a valid integer.")
+        if not self.crosses_tension and not isinstance(self.crosses_tension, int):
+            raise ValueError("mains_tension must be a valid integer.")
+        if not self.mains_string_id and not isinstance(self.mains_string_id, int):
+            raise ValueError("mains_tension must be a valid integer.")
+        if not self.crosses_string_id and not isinstance(self.crosses_string_id, int):
+            raise ValueError("mains_tension must be a valid integer.")
+        if self.paid is None or not isinstance(self.paid, bool):
+            raise ValueError("paid must be either true or false.")
         if self.completed is None or not isinstance(self.completed, bool):
-            raise ValueError("Completed must be either true or false.")
-
-        #progress
-        if self.goal_progress >= self.goal_value and not self.completed or self.goal_progress < self.goal_value and self.completed:
-            raise ValueError("Goal completion mismatch.")
-        try:
-            notes = json.loads(self.progress_notes)
-            if not isinstance(notes, list):
-                raise ValueError("Progress notes must be a JSON-formatted list.")
-        except (ValueError, TypeError):
-            raise ValueError("Progress notes must be a valid JSON-formatted string representing a list.")
+            raise ValueError("completed must be either true or false.")
 
     @classmethod
     def create_order(cls, customer_id: int, racket_id: int, date: Date, mains_tension: int, crosses_tension: int, mains_string_id: int, crosses_string_id: int, paid: bool) -> None:
@@ -521,10 +521,15 @@ class Orders(Base):
         Updates a order in the database by its ID.
 
         Args:
-            goal_id (int): The ID of the goal to update.
-            target (str, optional): The new target value.
-            goal_value (int, optional): The new goal value.
-            goal_progress ((float, int), optional): The new goal progress value.
+            goal_id (int): The ID of the order to update.
+            customer_id (int, optional): The new customer_id value.
+            racket_id (int, optional): The new racket_id value.
+            date (Date, optional): The new date.
+            mains_tension (int, optional): The new mains_tension value.
+            crosses_tension (int, optional): The new crosses_tension value.
+            mains_string_id (str, optional): The new mains_string_id value.
+            crosses_string_id (int, optional): The new crosses_string_id value.
+            paid (bool, optional): The new paid status.
             completed (bool, optional): The new completion status.
 
         Returns:
@@ -544,9 +549,6 @@ class Orders(Base):
                 raise ValueError(f"Order with ID {order_id} not found.")
 
             # Update only provided fields
-            if racket_id is not None:
-                order.racket_id = racket_id
-
             if mains_tension is not None:
                 if not isinstance(mains_tension, int):
                     raise ValueError("mains_tension must be an integer.")
