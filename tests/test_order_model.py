@@ -12,7 +12,7 @@ def order_wilson(session):
         order_id=1,
         customer_id=1, 
         racket_id=1, 
-        date=date(2025, 6, 10), 
+        order_date=date(2025, 6, 10), 
         mains_tension=55, 
         crosses_tension=55,
         mains_string_id=1,
@@ -30,13 +30,13 @@ def order_head(session):
         order_id=2,
         customer_id=2, 
         racket_id=2, 
-        date=date(2025, 6, 18), 
+        order_date=date(2025, 6, 18), 
         mains_tension=54, 
         crosses_tension=50,
         mains_string_id=2,
         crosses_string_id=3,
         paid=True,
-        completed=False,
+        completed=False
     )
 
     session.add(order)
@@ -47,19 +47,19 @@ def order_head(session):
 
 def test_create_order(session):
     """Test creating a new order."""
-    Orders.create_order(customer_id=1, racket_id=1, date=date(2025, 6, 10), mains_tension=55, mains_string_id=1, paid=False)
+    Orders.create_order(customer_id=1, racket_id=1, order_date=date(2025, 6, 10), mains_tension=55, crosses_tension=55, mains_string_id=1, crosses_string_id=1, paid=False)
     order = session.query(Orders).filter_by(customer_id=3).first()
     assert order is not None
     assert order.customer_id == 1
     assert order.racket_id == 1
-    assert order.date == date(2025, 6, 10)
+    assert order.order_date == date(2025, 6, 10)
     assert order.mains_tension == 55
     assert order.crosses_tension == 55
     assert order.mains_string_id == 1
     assert order.crosses_string_id == 1
     assert not order.paid
 
-@pytest.mark.parametrize("customer_id, racket_id, date, mains_tension, crosses_tension, mains_string_id, crosses_string_id, paid", [
+@pytest.mark.parametrize("customer_id, racket_id, order_date, mains_tension, crosses_tension, mains_string_id, crosses_string_id, paid", [
     ("1", 1, date(2025,1,1), 50, 50, 1, 1, False),
     (1, "1", date(2025,1,1), 50, 50, 1, 1, False),
     (1, 1, 202511, 50, 50, 1, 1, False),
@@ -70,10 +70,10 @@ def test_create_order(session):
     (1, 1, date(2025,1,1), 50, 50, 1, 1, "False")
 ])
 
-def test_create_order_invalid_data(customer_id, racket_id, date, mains_tension, crosses_tension, mains_string_id, crosses_string_id, paid):
+def test_create_order_invalid_data(customer_id, racket_id, order_date, mains_tension, crosses_tension, mains_string_id, crosses_string_id, paid):
     """Test validation errors during order creation."""
     with pytest.raises(ValueError):
-        Orders.create_order(customer_id, racket_id, date, mains_tension, crosses_tension, mains_string_id, crosses_string_id, paid)
+        Orders.create_order(customer_id, racket_id, order_date, mains_tension, crosses_tension, mains_string_id, crosses_string_id, paid)
 
 
 # --- Get order ---
@@ -82,7 +82,7 @@ def test_get_order_by_id(order_wilson):
     """Test fetching a order by ID."""
     fetched = Orders.get_order_by_id(order_wilson.order_id)
     assert fetched.customer_id == 1
-    assert fetched.date == date(2025, 6, 10)
+    assert fetched.order_date == date(2025, 6, 10)
 
 def test_get_order_by_id_not_found(app, session):
     """Test error when fetching nonexistent order by ID."""
@@ -115,11 +115,44 @@ def test_get_order_by_id_not_found(app, session):
 #     fetched = orders.get_order_by_id(order_biceps.id)
 #     assert isinstance(fetched.completed, bool)
 #     assert fetched.completed == order_biceps.completed
+# --- Get All orders ---
+
+def test_get_all_orders(session, order_wilson, order_head):
+    """Test retrieving all orders."""
+    orders = Orders.get_all_orders()
+    assert isinstance(orders, list)
+    expected = [
+        {
+            "order_id": order_wilson.order_id,
+            "customer_id": order_wilson.customer_id,
+            "racket_id": order_wilson.racket_id,
+            "order_date": order_wilson.order_date,
+            "mains_tension": order_wilson.mains_tension,
+            "crosses_tension": order_wilson.crosses_tension,
+            "mains_string_id": order_wilson.mains_string_id,
+            "crosses_string_id": order_wilson.crosses_string_id,
+            "paid": order_wilson.paid,
+            "completed": order_wilson.completed
+        },
+        {
+            "order_id": order_head.order_id,
+            "customer_id": order_head.customer_id,
+            "racket_id": order_head.racket_id,
+            "order_date": order_head.order_date,
+            "mains_tension": order_head.mains_tension,
+            "crosses_tension": order_head.crosses_tension,
+            "mains_string_id": order_head.mains_string_id,
+            "crosses_string_id": order_head.crosses_string_id,
+            "paid": order_head.paid,
+            "completed": order_head.completed
+        }
+    ]
+    assert orders == expected
 
 # --- Update ---
 def test_update_order(session, order_wilson):
     """Test updating an existing order."""
-    updated = Orders.update_order(order_wilson.id, racket_id=5, crosses_string_id=7)
+    updated = Orders.update_order(order_wilson.order_id, racket_id=5, crosses_string_id=7)
     assert updated.racket_id == 5
     assert updated.crosses_string_id == 7
 
@@ -127,8 +160,8 @@ def test_update_order(session, order_wilson):
 
 def test_delete_order_by_id(session, order_wilson):
     """Test deleting a order by ID."""
-    Orders.delete_order(order_wilson.id)
-    assert session.query(Orders).get(order_wilson.id) is None
+    Orders.delete_order(order_wilson.order_id)
+    assert session.query(Orders).get(order_wilson.order_id) is None
 
 def test_delete_order_not_found(app, session):
     """Test deleting a non-existent order by ID."""
@@ -198,36 +231,3 @@ def test_delete_order_not_found(app, session):
 #     assert result[0]["name"] == "bicep curl"
 
 
-# --- Get All orders ---
-
-def test_get_all_orders(session, order_wilson, order_head):
-    """Test retrieving all orders."""
-    orders = Orders.get_all_orders()
-    assert isinstance(orders, list)
-    expected = [
-        {
-            "order_id": order_wilson.id,
-            "customer_id": order_wilson.target,
-            "racket_id": order_wilson.order_value,
-            "date": order_wilson.order_progress,
-            "mains_tension": order_wilson.completed,
-            "crosses_tension": order_wilson.progress_notes,
-            "mains_string_id": order_wilson.mains_string_id,
-            "crosses_string_id": order_wilson.crosses_string_id,
-            "paid": order_wilson.paid,
-            "completed": order_wilson.completed
-        },
-        {
-            "order_id": order_head.id,
-            "customer_id": order_head.target,
-            "racket_id": order_head.order_value,
-            "date": order_head.order_progress,
-            "mains_tension": order_head.completed,
-            "crosses_tension": order_head.progress_notes,
-            "mains_string_id": order_head.mains_string_id,
-            "crosses_string_id": order_head.crosses_string_id,
-            "paid": order_head.paid,
-            "completed": order_head.completed
-        }
-    ]
-    assert orders == expected

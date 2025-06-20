@@ -3,20 +3,21 @@ import json
 from sqlalchemy import Text, Integer, Float, Boolean, Date, ForeignKey
 
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlalchemy.orm import mapped_column
+# from sqlalchemy.orm import mapped_column
 # from stringTracker.utils.api_utils import fetch_recommendation
 from typing import Optional, Union
 from datetime import date
 
+from RacketTracker.models.order_model import Orders
 
-from RacketTracker.db import db, Base
+from RacketTracker.db import db # , Base
 from RacketTracker.utils.logger import configure_logger
 
 
 logger = logging.getLogger(__name__)
 configure_logger(logger)
 
-class Strings(Base):
+class Strings(db.Model):
     """Represents a string.
 
     This model maps to the 'strings' table and stores metadata for desired target areas.
@@ -26,12 +27,16 @@ class Strings(Base):
 
     __tablename__ = "strings"
     
-    string_id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    brand = mapped_column(Text, nullable=False)
-    model = mapped_column(Text, nullable=False)
-    gauge = mapped_column(Integer, nullable=True)
-    shape = mapped_column(Text, nullable=True)
-    type = mapped_column(Text, nullable=False)
+    string_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    brand = db.Column(db.Text, nullable=False)
+    model = db.Column(db.Text, nullable=False)
+    gauge = db.Column(db.Integer, nullable=True)
+    shape = db.Column(db.Text, nullable=True)
+    type = db.Column(db.Text, nullable=False)
+
+    order_mains = db.relationship("Orders", back_populates="mains_string")
+    order_crosses = db.relationship("Orders", back_populates="crosses_string")
+
 
     def validate(self) -> None:
         """Validates the string instance before committing to the database.

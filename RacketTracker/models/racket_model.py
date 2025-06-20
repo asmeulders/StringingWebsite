@@ -3,20 +3,21 @@ import json
 from sqlalchemy import Text, Integer, Float, Boolean, Date, ForeignKey
 
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlalchemy.orm import mapped_column
+# from sqlalchemy.orm import mapped_column
 # from RacketTracker.utils.api_utils import fetch_recommendation
 from typing import Optional, Union
 from datetime import date
 
+from RacketTracker.models.order_model import Orders
 
-from RacketTracker.db import db, Base
+from RacketTracker.db import db # , Base
 from RacketTracker.utils.logger import configure_logger
 
 
 logger = logging.getLogger(__name__)
 configure_logger(logger)
 
-class Rackets(Base):
+class Rackets(db.Model):
     """Represents a racket.
 
     This model maps to the 'rackets' table and stores metadata for desired target areas.
@@ -26,17 +27,19 @@ class Rackets(Base):
 
     __tablename__ = "rackets"
     
-    racket_id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    brand = mapped_column(Text, nullable=False)
-    model = mapped_column(Text, nullable=False)
-    year = mapped_column(Integer, nullable=True)
-    head_size = mapped_column(Integer, nullable=False)
-    grip_size = mapped_column(Float, nullable=False)
-    weight = mapped_column(Integer, nullable=False)
-    stringing_pattern = mapped_column(Text, nullable=False)
-    swing_weight = mapped_column(Float, nullable=True)
-    balance = mapped_column(Float, nullable=True)
-    stiffness = mapped_column(Integer, nullable=True)
+    racket_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    brand = db.Column(db.Text, nullable=False)
+    model = db.Column(db.Text, nullable=False)
+    year = db.Column(db.Integer, nullable=True)
+    head_size = db.Column(db.Integer, nullable=False)
+    grip_size = db.Column(db.Float, nullable=False)
+    weight = db.Column(db.Integer, nullable=False)
+    stringing_pattern = db.Column(db.Text, nullable=False)
+    swing_weight = db.Column(db.Float, nullable=True)
+    balance = db.Column(db.Float, nullable=True)
+    stiffness = db.Column(db.Integer, nullable=True)
+
+    orders = db.relationship("Orders", backpopulates="racket")
 
     def validate(self) -> None:
         """Validates the racket instance before committing to the database.

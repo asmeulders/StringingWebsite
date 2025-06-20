@@ -3,20 +3,21 @@ import json
 from sqlalchemy import Text, Integer, Float, Boolean, Date, ForeignKey
 
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlalchemy.orm import mapped_column
+# from sqlalchemy.orm import mapped_column
 # from customerTracker.utils.api_utils import fetch_recommendation
 from typing import Optional, Union
 from datetime import date
 
+from RacketTracker.models.order_model import Orders
 
-from RacketTracker.db import db, Base
+from RacketTracker.db import db# , Base
 from RacketTracker.utils.logger import configure_logger
 
 
 logger = logging.getLogger(__name__)
 configure_logger(logger)
 
-class Customers(Base):
+class Customers(db.Model):
     """Represents a customer.
 
     This model maps to the 'customers' table and stores metadata for desired target areas.
@@ -26,9 +27,11 @@ class Customers(Base):
 
     __tablename__ = "customers"
     
-    customer_id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name = mapped_column(Text, nullable=False)
-    phone_number = mapped_column(Integer, nullable=False)
+    customer_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.Text, nullable=False)
+    phone_number = db.Column(db.Integer, nullable=False)
+    
+    orders = db.relationship("Orders", back_populates="customer")
 
     def validate(self) -> None:
         """Validates the customer instance before committing to the database.
