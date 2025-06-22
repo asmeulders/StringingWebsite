@@ -1,6 +1,6 @@
 import pytest
 
-from RacketTracker.models.order_model import Orders
+from RacketTracker.models.order_model import Orders, Customers, Strings, Rackets
 from pytest_mock import MockerFixture
 from datetime import date
 
@@ -43,11 +43,58 @@ def order_head(session):
     session.commit()
     return order
 
+@pytest.fixture
+def customer(session):
+    customer = Customers(
+        customer_id=1,
+        name="Alex",
+        phone_number=1000000001
+    )
+
+    session.add(customer)
+    session.commit()
+    return customer
+
+@pytest.fixture
+def string(session):
+    string = Strings(
+        string_id=1,
+        brand="Luxilon", 
+        model="ALU Power", 
+        gauge=125, 
+        shape="Round", 
+        type="Polyester"
+    )
+
+    session.add(string)
+    session.commit()
+    return string
+
+@pytest.fixture
+def racket(session):
+    racket = Rackets(
+        racket_id=1,
+        brand="Wilson", 
+        model="Pro Staff", 
+        year=2021, 
+        head_size=97, 
+        grip_size=4.375,
+        weight=315,
+        stringing_pattern="16x19",
+        swing_weight=315,
+        balance=27,
+        stiffness=60
+    )
+
+    session.add(racket)
+    session.commit()
+    return racket
+
 # --- Create order ---
 
-def test_create_order(session):
+def test_create_order(session, customer, racket, string):
     """Test creating a new order."""
-    Orders.create_order(customer_id=1, racket_id=1, order_date=date(2025, 6, 10), mains_tension=55, crosses_tension=55, mains_string_id=1, crosses_string_id=1, paid=False)
+    Orders.create_order(customer_id=1, racket_id=1, order_date=date(2025, 6, 10), mains_tension=55, crosses_tension=55, mains_string_id=1, crosses_string_id=1, paid=False, customer=customer, racket=racket, mains_string=string, crosses_string=string)
     order = session.query(Orders).filter_by(customer_id=3).first()
     assert order is not None
     assert order.customer_id == 1
@@ -58,22 +105,26 @@ def test_create_order(session):
     assert order.mains_string_id == 1
     assert order.crosses_string_id == 1
     assert not order.paid
+    assert order.customer == customer
+    assert order.racket == racket
+    assert order.mains_string == string
+    assert order.crosses_string == string
 
-@pytest.mark.parametrize("customer_id, racket_id, order_date, mains_tension, crosses_tension, mains_string_id, crosses_string_id, paid", [
-    ("1", 1, date(2025,1,1), 50, 50, 1, 1, False),
-    (1, "1", date(2025,1,1), 50, 50, 1, 1, False),
-    (1, 1, 202511, 50, 50, 1, 1, False),
-    (1, 1, date(2025,1,1), "50", 50, 1, 1, False),
-    (1, 1, date(2025,1,1), 50, "50", 1, 1, False),
-    (1, 1, date(2025,1,1), 50, 50, "1", 1, False),
-    (1, 1, date(2025,1,1), 50, 50, 1, "1", False),
-    (1, 1, date(2025,1,1), 50, 50, 1, 1, "False")
+@pytest.mark.parametrize("customer_id, racket_id, order_date, mains_tension, crosses_tension, mains_string_id, crosses_string_id, paid, customer, racket, mains_string, crosses_string", [
+    ("1", 1, date(2025,1,1), 50, 50, 1, 1, False, customer, racket, string, string),
+    (1, "1", date(2025,1,1), 50, 50, 1, 1, False, customer, racket, string, string),
+    (1, 1, 202511, 50, 50, 1, 1, False, customer, racket, string, string),
+    (1, 1, date(2025,1,1), "50", 50, 1, 1, False, customer, racket, string, string),
+    (1, 1, date(2025,1,1), 50, "50", 1, 1, False, customer, racket, string, string),
+    (1, 1, date(2025,1,1), 50, 50, "1", 1, False, customer, racket, string, string),
+    (1, 1, date(2025,1,1), 50, 50, 1, "1", False, customer, racket, string, string),
+    (1, 1, date(2025,1,1), 50, 50, 1, 1, "False", customer, racket, string, string)
 ])
 
-def test_create_order_invalid_data(customer_id, racket_id, order_date, mains_tension, crosses_tension, mains_string_id, crosses_string_id, paid):
+def test_create_order_invalid_data(customer_id, racket_id, order_date, mains_tension, crosses_tension, mains_string_id, crosses_string_id, paid, customer, racket, mains_string, crosses_string):
     """Test validation errors during order creation."""
     with pytest.raises(ValueError):
-        Orders.create_order(customer_id, racket_id, order_date, mains_tension, crosses_tension, mains_string_id, crosses_string_id, paid)
+        Orders.create_order(customer_id, racket_id, order_date, mains_tension, crosses_tension, mains_string_id, crosses_string_id, paid, customer, racket, mains_string, crosses_string)
 
 
 # --- Get order ---
