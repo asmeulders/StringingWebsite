@@ -4,7 +4,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from app import create_app
 from config import TestConfig
-from coach_peter.db import db
+from RacketTracker.db import db
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 @pytest.fixture

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Variables
-IMAGE_NAME="RacketTracker"
+IMAGE_NAME="racket-tracker"
 CONTAINER_TAG="1.0.0"
 HOST_PORT=5000
 CONTAINER_PORT=5000
