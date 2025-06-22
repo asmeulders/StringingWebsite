@@ -1,6 +1,6 @@
 import pytest
 
-from RacketTracker.models.order_model import Orders, Customers, Strings, Rackets
+from RacketTracker.models.order_model import Orders # , Customers, Strings, Rackets
 from pytest_mock import MockerFixture
 from datetime import date
 
@@ -15,8 +15,8 @@ def order_wilson(session):
         racket="Wilson Pro Staff", 
         mains_tension=52, 
         crosses_tension=52,
-        mains_string_id="Luxilon ALU Power",
-        crosses_string_id="Luxilon ALU Power",
+        mains_string="Luxilon ALU Power",
+        crosses_string="Luxilon ALU Power",
         paid=False,
         completed=False,
     )
@@ -167,7 +167,7 @@ def test_get_order_by_id_not_found(app, session):
 def test_get_all_orders(session, order_wilson: Orders, order_head: Orders):
     """Test retrieving all orders."""
     orders = Orders.get_all_orders()
-    assert isinstance(orders, list[Orders])
+    assert isinstance(orders, list)
     expected = [
         {
             "order_id": order_wilson.order_id,
