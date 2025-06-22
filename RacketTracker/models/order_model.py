@@ -853,20 +853,15 @@ class Orders(db.Model):
     __tablename__ = "orders"
     
     order_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    customer_id = db.Column(db.Integer, ForeignKey('customers.customer_id'), nullable=False)
-    racket_id = db.Column(db.Integer, ForeignKey('rackets.racket_id'), nullable=False)
+    customer = db.Column(db.Text, nullable=False)
     order_date = db.Column(db.Date, nullable=False)
+    racket = db.Column(db.Text, nullable=False)
     mains_tension = db.Column(db.Integer, nullable=False)
-    crosses_tension = db.Column(db.Integer, nullable=False, default=mains_tension)
-    mains_string_id = db.Column(db.Integer, ForeignKey('strings.string_id'))
-    crosses_string_id = db.Column(db.Integer, ForeignKey('strings.string_id'), default=mains_string_id)
+    crosses_tension = db.Column(db.Integer, nullable=True)
+    mains_string = db.Column(db.Text, nullable=False)
+    crosses_string = db.Column(db.Text, nullable=True)
     paid = db.Column(db.Boolean, default=False)
     completed = db.Column(db.Boolean, default=False)
-
-    customer = db.relationship("Customers", back_populates="orders")
-    racket = db.relationship("Rackets", back_populates="orders")
-    mains_string = db.relationship("Strings", foreign_keys=[mains_string_id])
-    crosses_string = db.relationship("Strings", foreign_keys=[crosses_string_id])
 
     def validate(self) -> None:
         """Validates the order instance before committing to the database.
@@ -880,39 +875,40 @@ class Orders(db.Model):
         # if self.recurring is not None and (not isinstance(self.recurring, str) or not self.recurring.strip()):
         #     raise ValueError("Recurring goal must be a non-empty string if provided.")
         
-        if not self.customer_id or not isinstance(self.customer_id, int):
-            raise ValueError("customer_id must be a valid integer")
-        if not self.racket_id or not isinstance(self.racket_id, int):
-            raise ValueError("racket_id must be a valid integer.")
+        if not self.customer and not isinstance(self.customer, str):
+            raise ValueError("customer must be a non-empty string.")
         if not self.order_date and not isinstance(self.order_date, date):
             raise ValueError("date must be a Date object.")
+        if not self.racket or not isinstance(self.racket, str):
+            raise ValueError("racket must be a non-empty string.")
         if not self.mains_tension and not isinstance(self.mains_tension, int):
             raise ValueError("mains_tension must be a valid integer.")
-        if not self.crosses_tension and not isinstance(self.crosses_tension, int):
-            raise ValueError("mains_tension must be a valid integer.")
-        if not self.mains_string_id and not isinstance(self.mains_string_id, int):
-            raise ValueError("mains_tension must be a valid integer.")
-        if not self.crosses_string_id and not isinstance(self.crosses_string_id, int):
-            raise ValueError("mains_tension must be a valid integer.")
+        if not isinstance(self.crosses_tension, int):
+            raise ValueError("crosses_tension must be a valid integer.")
+        if not self.mains_string and not isinstance(self.mains_string, str):
+            raise ValueError("mains_string must be a non-empty string.")
+        if not isinstance(self.crosses_string, str):
+            raise ValueError("crosses_string must be a non-empty string.")
         if self.paid is None or not isinstance(self.paid, bool):
             raise ValueError("paid must be either true or false.")
         if self.completed is None or not isinstance(self.completed, bool):
             raise ValueError("completed must be either true or false.")
 
     @classmethod
-    def create_order(cls, customer_id: int, racket_id: int, order_date: date, mains_tension: int, crosses_tension: int, mains_string_id: int, crosses_string_id: int, paid: bool, customer: Customers, racket: Rackets, mains_string: Strings, crosses_string, completed: bool = False) -> None:
+    def create_order(cls, customer: str, order_date: date, racket: str, mains_tension: int, crosses_tension: int, mains_string: str, crosses_string: str, paid: bool = False, completed: bool = False) -> None:
         """
         Creates a new order in the orders table using SQLAlchemy.
 
         Args:
-            customer_id (int): Foreign key of the customer.
-            racket_id (int): Foreign key of the racket provided.
+            customer (str): Name of the customer.
             order_date (date): Date of the order.
+            racket (str): Name of the racket provided.
             mains_tension (int): Tension of the mains.
             crosses_tension (int, optional): Tension of the crosses.
-            mains_string_id (int): Foreign key of the string used on the mains.
-            crosses_string_id (int, optional): Foreign key of the string used on the crosses.
-            paid (bool, optional): True if paid for by customer.
+            mains_string (int): Name of the string used on the mains.
+            crosses_string (int, optional): Name of the string used on the crosses.
+            paid (bool, optional): Paid status of the order.
+            completed (bool, optional): Completion status of the racket stringing.
 
         Raises:
             ValueError: If any field is invalid. 
@@ -922,19 +918,15 @@ class Orders(db.Model):
 
         try:
             order = Orders(
-                customer_id=customer_id,
-                racket_id=racket_id,
+                customer=customer,
                 order_date=order_date,
+                racket=racket,
                 mains_tension=mains_tension,
                 crosses_tension=crosses_tension,
-                mains_string_id=mains_string_id,
-                crosses_string_id=crosses_string_id,
-                paid=paid,
-                completed=completed,
-                customer=customer,
-                racket=racket,
                 mains_string=mains_string,
-                crosses_string=crosses_string
+                crosses_string=crosses_string,
+                paid=paid,
+                completed=completed
             )
             order.validate()
         except ValueError as e:
@@ -1318,13 +1310,13 @@ class Orders(db.Model):
             results = [
                 {
                     "order_id": order.order_id,
-                    "customer_id": order.customer_id,
-                    "racket_id": order.racket_id,
+                    "customer": order.customer,
                     "order_date": order.order_date,
+                    "racket": order.racket,
                     "mains_tension": order.mains_tension,
                     "crosses_tension": order.crosses_tension,
-                    "mains_string_id": order.mains_string_id,
-                    "crosses_string_id": order.crosses_string_id,
+                    "mains_string": order.mains_string,
+                    "crosses_string": order.crosses_string,
                     "paid": order.paid,
                     "completed": order.completed
                 }
@@ -1345,11 +1337,13 @@ class Orders(db.Model):
     def update_order(
         cls,
         order_id: int,
-        racket_id: int = None,
+        customer: str = None,
+        order_date: date = None,
+        racket: int = None,
         mains_tension: int = None,
         crosses_tension: int = None,
-        mains_string_id: int = None,
-        crosses_string_id: int = None,
+        mains_string: int = None,
+        crosses_string: int = None,
         paid: bool = None,
         completed: bool = None
     ) -> "Orders":
@@ -1358,13 +1352,13 @@ class Orders(db.Model):
 
         Args:
             goal_id (int): The ID of the order to update.
-            customer_id (int, optional): The new customer_id value.
-            racket_id (int, optional): The new racket_id value.
-            date (Date, optional): The new date.
+            customer (int, optional): The new customer value.
+            order_date (Date, optional): The new date.
+            racket (int, optional): The new racket value.
             mains_tension (int, optional): The new mains_tension value.
             crosses_tension (int, optional): The new crosses_tension value.
-            mains_string_id (str, optional): The new mains_string_id value.
-            crosses_string_id (int, optional): The new crosses_string_id value.
+            mains_string (str, optional): The new mains_string value.
+            crosses_string (int, optional): The new crosses_string value.
             paid (bool, optional): The new paid status.
             completed (bool, optional): The new completion status.
 
@@ -1378,17 +1372,27 @@ class Orders(db.Model):
         logger.info(f"Attempting to update order with ID {order_id}")
 
         try:
-            order = cls.query.get(order_id)
+            order: Orders = cls.query.get(order_id)
 
             if not order:
                 logger.warning(f"Order with ID {order_id} not found.")
                 raise ValueError(f"Order with ID {order_id} not found.")
 
             # Update only provided fields
-            if racket_id is not None:
-                if not isinstance(racket_id, int):
-                    raise ValueError("racket_id must be an integer.")
-                order.racket_id = racket_id
+            if customer is not None:
+                if not isinstance(customer, str):
+                    raise ValueError("customer must be an string.")
+                order.customer = customer
+
+            if order_date is not None:
+                if not isinstance(order_date, str):
+                    raise ValueError("order_date must be a date object.")
+                order.order_date = order_date
+
+            if racket is not None:
+                if not isinstance(racket, str):
+                    raise ValueError("racket must be an string.")
+                order.racket = racket
 
             if mains_tension is not None:
                 if not isinstance(mains_tension, int):
@@ -1397,18 +1401,18 @@ class Orders(db.Model):
 
             if crosses_tension is not None:
                 if not isinstance(crosses_tension, int):
-                    raise ValueError("crosses_tensino must be an int.")
+                    raise ValueError("crosses_tension must be an int.")
                 order.crosses_tension = crosses_tension
 
-            if mains_string_id is not None:
-                if not isinstance(mains_string_id, int):
-                    raise ValueError("mains_string_id must be an integer.")
-                order.mains_string_id = mains_string_id
+            if mains_string is not None:
+                if not isinstance(mains_string, int):
+                    raise ValueError("mains_string must be an string.")
+                order.mains_string = mains_string
 
-            if crosses_string_id is not None:
-                if not isinstance(crosses_string_id, int):
-                    raise ValueError("crosses_string_id must be an int.")
-                order.crosses_string_id = crosses_string_id
+            if crosses_string is not None:
+                if not isinstance(crosses_string, int):
+                    raise ValueError("crosses_string must be a string.")
+                order.crosses_string = crosses_string
             
             if paid is not None:
                 if not isinstance(paid, bool):
