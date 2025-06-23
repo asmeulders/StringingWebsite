@@ -1,6 +1,6 @@
 import pytest
 
-from RacketTracker.models.order_model import Orders, Customers, Strings, Rackets
+from RacketTracker.models.order_model import Orders # , Customers, Strings, Rackets
 from pytest_mock import MockerFixture
 from datetime import date
 
@@ -10,13 +10,13 @@ from datetime import date
 def order_wilson(session): 
     order = Orders(
         order_id=1,
-        customer_id=1, 
-        racket_id=1, 
-        order_date=date(2025, 6, 10), 
-        mains_tension=55, 
-        crosses_tension=55,
-        mains_string_id=1,
-        crosses_string_id=1,
+        customer="Alex",
+        order_date=date(2025, 6, 10),  
+        racket="Wilson Pro Staff", 
+        mains_tension=52, 
+        crosses_tension=52,
+        mains_string="Luxilon ALU Power",
+        crosses_string="Luxilon ALU Power",
         paid=False,
         completed=False,
     )
@@ -28,13 +28,13 @@ def order_wilson(session):
 def order_head(session):
     order = Orders(
         order_id=2,
-        customer_id=2, 
-        racket_id=2, 
+        customer="Rocky", 
         order_date=date(2025, 6, 18), 
+        racket="Head Speed MP", 
         mains_tension=54, 
         crosses_tension=50,
-        mains_string_id=2,
-        crosses_string_id=3,
+        mains_string="Head Velocity",
+        crosses_string="Head Synthetic Gut",
         paid=True,
         completed=False
     )
@@ -44,95 +44,91 @@ def order_head(session):
     return order
 
 @pytest.fixture
-def customer(session):
-    customer = Customers(
-        customer_id=1,
-        name="Alex",
-        phone_number=1000000001
-    )
+# def customer(session):
+#     customer = Customers(
+#         customer_id=1,
+#         name="Alex",
+#         phone_number=1000000001
+#     )
 
-    session.add(customer)
-    session.commit()
-    return customer
+#     session.add(customer)
+#     session.commit()
+#     return customer
 
-@pytest.fixture
-def string(session):
-    string = Strings(
-        string_id=1,
-        brand="Luxilon", 
-        model="ALU Power", 
-        gauge=125, 
-        shape="Round", 
-        type="Polyester"
-    )
+# @pytest.fixture
+# def string(session):
+#     string = Strings(
+#         string_id=1,
+#         brand="Luxilon", 
+#         model="ALU Power", 
+#         gauge=125, 
+#         shape="Round", 
+#         type="Polyester"
+#     )
 
-    session.add(string)
-    session.commit()
-    return string
+#     session.add(string)
+#     session.commit()
+#     return string
 
-@pytest.fixture
-def racket(session):
-    racket = Rackets(
-        racket_id=1,
-        brand="Wilson", 
-        model="Pro Staff", 
-        year=2021, 
-        head_size=97, 
-        grip_size=4.375,
-        weight=315,
-        stringing_pattern="16x19",
-        swing_weight=315,
-        balance=27,
-        stiffness=60
-    )
+# @pytest.fixture
+# def racket(session):
+#     racket = Rackets(
+#         racket_id=1,
+#         brand="Wilson", 
+#         model="Pro Staff", 
+#         year=2021, 
+#         head_size=97, 
+#         grip_size=4.375,
+#         weight=315,
+#         stringing_pattern="16x19",
+#         swing_weight=315,
+#         balance=27,
+#         stiffness=60
+#     )
 
-    session.add(racket)
-    session.commit()
-    return racket
+#     session.add(racket)
+#     session.commit()
+#     return racket
 
 # --- Create order ---
 
-def test_create_order(session, customer, racket, string):
+def test_create_order(session, order_wilson: Orders):
     """Test creating a new order."""
-    Orders.create_order(customer_id=1, racket_id=1, order_date=date(2025, 6, 10), mains_tension=55, crosses_tension=55, mains_string_id=1, crosses_string_id=1, paid=False, customer=customer, racket=racket, mains_string=string, crosses_string=string)
-    order = session.query(Orders).filter_by(customer_id=3).first()
+    Orders.create_order(customer=order_wilson.customer, order_date=order_wilson.order_date, racket=order_wilson.racket, mains_tension=order_wilson.mains_tension, crosses_tension=order_wilson.crosses_tension, mains_string=order_wilson.mains_string, crosses_string=order_wilson.crosses_string, paid=order_wilson.paid)
+    order: Orders = session.query(Orders).filter_by(customer_id=3).first()
     assert order is not None
-    assert order.customer_id == 1
-    assert order.racket_id == 1
+    assert order.customer == "Alex"
     assert order.order_date == date(2025, 6, 10)
-    assert order.mains_tension == 55
-    assert order.crosses_tension == 55
-    assert order.mains_string_id == 1
-    assert order.crosses_string_id == 1
+    assert order.racket == "Wilson Pro Staff"
+    assert order.mains_tension == 52
+    assert order.crosses_tension == 52
+    assert order.mains_string == "Luxilon Pro Staff"
+    assert order.crosses_string == "Luxilon Pro Staff"
     assert not order.paid
-    assert order.customer == customer
-    assert order.racket == racket
-    assert order.mains_string == string
-    assert order.crosses_string == string
 
-@pytest.mark.parametrize("customer_id, racket_id, order_date, mains_tension, crosses_tension, mains_string_id, crosses_string_id, paid, customer, racket, mains_string, crosses_string", [
-    ("1", 1, date(2025,1,1), 50, 50, 1, 1, False, customer, racket, string, string),
-    (1, "1", date(2025,1,1), 50, 50, 1, 1, False, customer, racket, string, string),
-    (1, 1, 202511, 50, 50, 1, 1, False, customer, racket, string, string),
-    (1, 1, date(2025,1,1), "50", 50, 1, 1, False, customer, racket, string, string),
-    (1, 1, date(2025,1,1), 50, "50", 1, 1, False, customer, racket, string, string),
-    (1, 1, date(2025,1,1), 50, 50, "1", 1, False, customer, racket, string, string),
-    (1, 1, date(2025,1,1), 50, 50, 1, "1", False, customer, racket, string, string),
-    (1, 1, date(2025,1,1), 50, 50, 1, 1, "False", customer, racket, string, string)
+@pytest.mark.parametrize("customer, order_date, racket, mains_tension, crosses_tension, mains_string, crosses_string, paid", [
+    (1, date(2025,1,1), "Wilson Pro Staff", 52, 52, "Luxilon ALU Power", "Luxilon ALU Power", False),
+    ("Alex", 202511, "Wilson Pro Staff", 52, 52, "Luxilon ALU Power", "Luxilon ALU Power", False),
+    ("Alex", date(2025,1,1), 1, 52, 52, "Luxilon ALU Power", "Luxilon ALU Power", False),
+    ("Alex", date(2025,1,1), "Wilson Pro Staff", "52", 52, "Luxilon ALU Power", "Luxilon ALU Power", False),
+    ("Alex", date(2025,1,1), "Wilson Pro Staff", 52, "52", "Luxilon ALU Power", "Luxilon ALU Power", False),
+    ("Alex", date(2025,1,1), "Wilson Pro Staff", 52, 52, 1, "Luxilon ALU Power", False),
+    ("Alex", date(2025,1,1), "Wilson Pro Staff", 52, 52, "Luxilon ALU Power", 1, False),
+    ("Alex", date(2025,1,1), "Wilson Pro Staff", 52, 52, "Luxilon ALU Power", "Luxilon ALU Power", "False")
 ])
 
-def test_create_order_invalid_data(customer_id, racket_id, order_date, mains_tension, crosses_tension, mains_string_id, crosses_string_id, paid, customer, racket, mains_string, crosses_string):
+def test_create_order_invalid_data(customer, order_date, racket, mains_tension, crosses_tension, mains_string, crosses_string, paid):
     """Test validation errors during order creation."""
     with pytest.raises(ValueError):
-        Orders.create_order(customer_id, racket_id, order_date, mains_tension, crosses_tension, mains_string_id, crosses_string_id, paid, customer, racket, mains_string, crosses_string)
+        Orders.create_order(customer, order_date, racket, mains_tension, crosses_tension, mains_string, crosses_string, paid)
 
 
 # --- Get order ---
 
-def test_get_order_by_id(order_wilson):
+def test_get_order_by_id(order_wilson: Orders):
     """Test fetching a order by ID."""
     fetched = Orders.get_order_by_id(order_wilson.order_id)
-    assert fetched.customer_id == 1
+    assert fetched.customer ==  "Alex"
     assert fetched.order_date == date(2025, 6, 10)
 
 def test_get_order_by_id_not_found(app, session):
@@ -168,32 +164,32 @@ def test_get_order_by_id_not_found(app, session):
 #     assert fetched.completed == order_biceps.completed
 # --- Get All orders ---
 
-def test_get_all_orders(session, order_wilson, order_head):
+def test_get_all_orders(session, order_wilson: Orders, order_head: Orders):
     """Test retrieving all orders."""
     orders = Orders.get_all_orders()
     assert isinstance(orders, list)
     expected = [
         {
             "order_id": order_wilson.order_id,
-            "customer_id": order_wilson.customer_id,
-            "racket_id": order_wilson.racket_id,
+            "customer": order_wilson.customer,
             "order_date": order_wilson.order_date,
+            "racket": order_wilson.racket,
             "mains_tension": order_wilson.mains_tension,
             "crosses_tension": order_wilson.crosses_tension,
-            "mains_string_id": order_wilson.mains_string_id,
-            "crosses_string_id": order_wilson.crosses_string_id,
+            "mains_string": order_wilson.mains_string,
+            "crosses_string": order_wilson.crosses_string,
             "paid": order_wilson.paid,
             "completed": order_wilson.completed
         },
         {
             "order_id": order_head.order_id,
-            "customer_id": order_head.customer_id,
-            "racket_id": order_head.racket_id,
+            "customer": order_head.customer,
             "order_date": order_head.order_date,
+            "racket": order_head.racket,
             "mains_tension": order_head.mains_tension,
             "crosses_tension": order_head.crosses_tension,
-            "mains_string_id": order_head.mains_string_id,
-            "crosses_string_id": order_head.crosses_string_id,
+            "mains_string": order_head.mains_string,
+            "crosses_string": order_head.crosses_string,
             "paid": order_head.paid,
             "completed": order_head.completed
         }
@@ -201,18 +197,18 @@ def test_get_all_orders(session, order_wilson, order_head):
     assert orders == expected
 
 # --- Update ---
-def test_update_order(session, order_wilson):
+def test_update_order(session, order_wilson: Orders):
     """Test updating an existing order."""
-    updated = Orders.update_order(order_wilson.order_id, racket_id=5, crosses_string_id=7)
-    assert updated.racket_id == 5
-    assert updated.crosses_string_id == 7
+    updated = Orders.update_order(order_wilson.order_id, racket="Head Speed MP", crosses_string="Wilson Sensation")
+    assert updated.racket == "Head Speed MP"
+    assert updated.crosses_string == "Wilson Sensation"
 
 # --- Delete order ---
 
-def test_delete_order_by_id(session, order_wilson):
+def test_delete_order_by_id(session, order_wilson: Orders):
     """Test deleting a order by ID."""
     Orders.delete_order(order_wilson.order_id)
-    assert session.query(Orders).get(order_wilson.order_id) is None
+    assert session.get(Orders, order_wilson.order_id) is None
 
 def test_delete_order_not_found(app, session):
     """Test deleting a non-existent order by ID."""
