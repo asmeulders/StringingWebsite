@@ -3,6 +3,7 @@ import json
 from sqlalchemy import Text, Integer, Float, Boolean, Date, ForeignKey
 
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.sql.expression import select
 # from sqlalchemy.orm import mapped_column
 # from RacketTracker.utils.api_utils import fetch_recommendation
 from typing import Optional, Union
@@ -875,17 +876,17 @@ class Orders(db.Model):
         # if self.recurring is not None and (not isinstance(self.recurring, str) or not self.recurring.strip()):
         #     raise ValueError("Recurring goal must be a non-empty string if provided.")
         
-        if not self.customer and not isinstance(self.customer, str):
+        if not self.customer or not isinstance(self.customer, str):
             raise ValueError("customer must be a non-empty string.")
-        if not self.order_date and not isinstance(self.order_date, date):
+        if not self.order_date or not isinstance(self.order_date, date):
             raise ValueError("date must be a Date object.")
         if not self.racket or not isinstance(self.racket, str):
             raise ValueError("racket must be a non-empty string.")
-        if not self.mains_tension and not isinstance(self.mains_tension, int):
+        if not self.mains_tension or not isinstance(self.mains_tension, int):
             raise ValueError("mains_tension must be a valid integer.")
         if not isinstance(self.crosses_tension, int):
             raise ValueError("crosses_tension must be a valid integer.")
-        if not self.mains_string and not isinstance(self.mains_string, str):
+        if not self.mains_string or not isinstance(self.mains_string, str):
             raise ValueError("mains_string must be a non-empty string.")
         if not isinstance(self.crosses_string, str):
             raise ValueError("crosses_string must be a non-empty string.")
@@ -963,7 +964,7 @@ class Orders(db.Model):
         logger.info(f"Received request to delete order with ID {order_id}")
 
         try:
-            order = cls.query.get(order_id)
+            order = db.session.get(cls, order_id)
             if not order:
                 logger.warning(f"Attempted to delete non-existent order with ID {order_id}")
                 raise ValueError(f"Order with ID {order_id} not found")
@@ -1150,7 +1151,7 @@ class Orders(db.Model):
         logger.info(f"Attempting to retrieve goal with ID {order_id}")
 
         try:
-            order = cls.query.get(order_id)
+            order = db.session.get(cls, order_id)
 
             if not order:
                 logger.info(f"Order with ID {order_id} not found")
@@ -1301,7 +1302,7 @@ class Orders(db.Model):
         logger.info("Attempting to retrieve all orders from the database")
 
         try:
-            orders: Orders = cls.query.all()
+            orders: list = db.session.scalars(select(cls)).all() # db.session.all()
 
             if not orders:
                 logger.warning("The orders table is empty.")
@@ -1372,7 +1373,7 @@ class Orders(db.Model):
         logger.info(f"Attempting to update order with ID {order_id}")
 
         try:
-            order: Orders = cls.query.get(order_id)
+            order: Orders = db.session.get(cls, order_id)
 
             if not order:
                 logger.warning(f"Order with ID {order_id} not found.")

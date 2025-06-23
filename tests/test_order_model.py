@@ -108,8 +108,8 @@ def test_create_order(session, order_wilson: Orders):
 
 @pytest.mark.parametrize("customer, order_date, racket, mains_tension, crosses_tension, mains_string, crosses_string, paid", [
     (1, date(2025,1,1), "Wilson Pro Staff", 52, 52, "Luxilon ALU Power", "Luxilon ALU Power", False),
-    ("Alex", date(2025,1,1), "Wilson Pro Staff", 52, 52, "Luxilon ALU Power", "Luxilon ALU Power", False),
     ("Alex", 202511, "Wilson Pro Staff", 52, 52, "Luxilon ALU Power", "Luxilon ALU Power", False),
+    ("Alex", date(2025,1,1), 1, 52, 52, "Luxilon ALU Power", "Luxilon ALU Power", False),
     ("Alex", date(2025,1,1), "Wilson Pro Staff", "52", 52, "Luxilon ALU Power", "Luxilon ALU Power", False),
     ("Alex", date(2025,1,1), "Wilson Pro Staff", 52, "52", "Luxilon ALU Power", "Luxilon ALU Power", False),
     ("Alex", date(2025,1,1), "Wilson Pro Staff", 52, 52, 1, "Luxilon ALU Power", False),
@@ -208,7 +208,7 @@ def test_update_order(session, order_wilson: Orders):
 def test_delete_order_by_id(session, order_wilson: Orders):
     """Test deleting a order by ID."""
     Orders.delete_order(order_wilson.order_id)
-    assert session.query(Orders).get(order_wilson.order_id) is None
+    assert session.get(Orders, order_wilson.order_id) is None
 
 def test_delete_order_not_found(app, session):
     """Test deleting a non-existent order by ID."""
