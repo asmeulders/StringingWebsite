@@ -10,12 +10,14 @@ DROP TABLE IF EXISTS orders
 CREATE TABLE orders (
     order_id INTEGER PRIMARY KEY AUTOINCREMENT,
     customer TEXT NOT NULL,
+    stringer TEXT,
     date DATE NOT NULL,
     racket TEXT NOT NULL,
     mains_tension INTEGER NOT NULL,
     crosses_tension INTEGER,
     mains_string TEXT NOT NULL,
     crosses_string TEXT,
+    replacement_grip TEXT,
     paid BOOLEAN DEFAULT(false),
     completed BOOLEAN DEFAULT(false),
     -- CONSTRAINT customer_id FOREIGN KEY (customer_id)

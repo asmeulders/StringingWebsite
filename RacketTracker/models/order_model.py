@@ -852,18 +852,21 @@ class Orders(db.Model):
     """
 
     __tablename__ = "orders"
-    
-    order_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    # also add grips parameter and an additional notes parameter
+    order_id = db.Column(db.Integer, primary_key=True, autoincrement=True) # add price parameter
     customer = db.Column(db.Text, nullable=False)
+    stringer = db.Column(db.Text, nullable=True)
     order_date = db.Column(db.Date, nullable=False)
     racket = db.Column(db.Text, nullable=False)
     mains_tension = db.Column(db.Integer, nullable=False)
-    crosses_tension = db.Column(db.Integer, nullable=True)
     mains_string = db.Column(db.Text, nullable=False)
+    crosses_tension = db.Column(db.Integer, nullable=True)
     crosses_string = db.Column(db.Text, nullable=True)
+    replacement_grip = db.Column(db.Text, nullable = True)
     paid = db.Column(db.Boolean, default=False)
     completed = db.Column(db.Boolean, default=False)
-
+    
     def validate(self) -> None:
         """Validates the order instance before committing to the database.
 
@@ -884,19 +887,21 @@ class Orders(db.Model):
             raise ValueError("racket must be a non-empty string.")
         if not self.mains_tension or not isinstance(self.mains_tension, int):
             raise ValueError("mains_tension must be a valid integer.")
-        if not isinstance(self.crosses_tension, int):
-            raise ValueError("crosses_tension must be a valid integer.")
         if not self.mains_string or not isinstance(self.mains_string, str):
             raise ValueError("mains_string must be a non-empty string.")
-        if not isinstance(self.crosses_string, str):
-            raise ValueError("crosses_string must be a non-empty string.")
+        if self.crosses_tension and not isinstance(self.crosses_tension, int):
+            raise ValueError("mains_tension must be a valid integer.")
+        if self.crosses_string and not isinstance(self.crosses_string, str):
+            raise ValueError("crosses_string must be a string.")
+        if self.replacement_grip and not isinstance(self.replacement_grip, str):
+            raise ValueError("replacement_grip must be a string.")
         if self.paid is None or not isinstance(self.paid, bool):
             raise ValueError("paid must be either true or false.")
-        if self.completed is None or not isinstance(self.completed, bool):
-            raise ValueError("completed must be either true or false.")
 
     @classmethod
-    def create_order(cls, customer: str, order_date: date, racket: str, mains_tension: int, crosses_tension: int, mains_string: str, crosses_string: str, paid: bool = False, completed: bool = False) -> None:
+    def create_order(cls, customer: str, order_date: date, racket: str, mains_tension: int, mains_string: str,
+                    crosses_tension: int = None, crosses_string: str = None, replacement_grip: str = None, 
+                    paid: bool = False) -> None:
         """
         Creates a new order in the orders table using SQLAlchemy.
 
@@ -908,8 +913,8 @@ class Orders(db.Model):
             crosses_tension (int, optional): Tension of the crosses.
             mains_string (int): Name of the string used on the mains.
             crosses_string (int, optional): Name of the string used on the crosses.
+            replacement_grip(str, optional): Name of the replacement grip to be used.
             paid (bool, optional): Paid status of the order.
-            completed (bool, optional): Completion status of the racket stringing.
 
         Raises:
             ValueError: If any field is invalid. 
@@ -923,11 +928,12 @@ class Orders(db.Model):
                 order_date=order_date,
                 racket=racket,
                 mains_tension=mains_tension,
-                crosses_tension=crosses_tension,
                 mains_string=mains_string,
+                crosses_tension=crosses_tension,
                 crosses_string=crosses_string,
+                replacement_grip=replacement_grip,
                 paid=paid,
-                completed=completed
+                completed=False
             )
             order.validate()
         except ValueError as e:
@@ -938,7 +944,7 @@ class Orders(db.Model):
             db.session.add(order)
             db.session.commit()
             paid_message = "Paid" if paid else "Unpaid"
-            logger.info(f"Order successfully placed: {mains_tension}. {paid_message}")
+            logger.info(f"Order created. {order_date.strftime('%m%d%y')} - {customer}: {racket} - {paid_message}")
 
         except SQLAlchemyError as e:
             logger.error(f"Database error while creating order: {e}")
@@ -1218,12 +1224,14 @@ class Orders(db.Model):
                 {
                     "order_id": order.order_id,
                     "customer": order.customer,
+                    "stringer": order.stringer,
                     "order_date": order.order_date,
                     "racket": order.racket,
                     "mains_tension": order.mains_tension,
-                    "crosses_tension": order.crosses_tension,
                     "mains_string": order.mains_string,
+                    "crosses_tension": order.crosses_tension,
                     "crosses_string": order.crosses_string,
+                    "replacement_grip": order.replacement_grip,
                     "paid": order.paid,
                     "completed": order.completed
                 }
@@ -1249,11 +1257,10 @@ class Orders(db.Model):
         order_date: date = None,
         racket: int = None,
         mains_tension: int = None,
-        crosses_tension: int = None,
         mains_string: int = None,
+        crosses_tension: int = None,
         crosses_string: int = None,
-        paid: bool = None,
-        completed: bool = None
+        replacement_grip: str = None
     ) -> "Orders":
         """
         Updates a order in the database by its ID.
@@ -1264,11 +1271,10 @@ class Orders(db.Model):
             order_date (Date, optional): The new date.
             racket (int, optional): The new racket value.
             mains_tension (int, optional): The new mains_tension value.
-            crosses_tension (int, optional): The new crosses_tension value.
             mains_string (str, optional): The new mains_string value.
+            crosses_tension (int, optional): The new crosses_tension value.
             crosses_string (int, optional): The new crosses_string value.
-            paid (bool, optional): The new paid status.
-            completed (bool, optional): The new completion status.
+            replacement_grip (str, optional): The new replacement_grip value.
 
         Returns:
             Orders: The updated order instance.
@@ -1307,30 +1313,25 @@ class Orders(db.Model):
                     raise ValueError("mains_tension must be an integer.")
                 order.mains_tension = mains_tension
 
-            if crosses_tension is not None:
-                if not isinstance(crosses_tension, int):
-                    raise ValueError("crosses_tension must be an int.")
-                order.crosses_tension = crosses_tension
-
             if mains_string is not None:
                 if not isinstance(mains_string, str):
                     raise ValueError("mains_string must be an string.")
                 order.mains_string = mains_string
 
+            if crosses_tension is not None:
+                if not isinstance(crosses_tension, int):
+                    raise ValueError("crosses_tension must be an int.")
+                order.crosses_tension = crosses_tension            
+
             if crosses_string is not None:
                 if not isinstance(crosses_string, str):
                     raise ValueError("crosses_string must be a string.")
                 order.crosses_string = crosses_string
-            
-            if paid is not None:
-                if not isinstance(paid, bool):
-                    raise ValueError("paid must be a boolean")
-                order.paid = paid
 
-            if completed is not None:
-                if not isinstance(completed, bool):
-                    raise ValueError("completed must be a boolean.")
-                order.completed = completed
+            if replacement_grip is not None:
+                if not isinstance(replacement_grip, str):
+                    raise ValueError("replacement_grip must be an string.")
+                order.replacement_grip = replacement_grip
 
             db.session.commit()
             logger.info(f"Successfully updated order with ID {order_id}")
@@ -1342,16 +1343,122 @@ class Orders(db.Model):
             raise
 
     @classmethod
-    def mark_completed(cls, order_id: int):
-        pass
+    def mark_completed(cls, order_id: int) -> "Orders":
+        """
+        Marks an order as completed.
+
+        Args:
+            order_id (int): The ID of the order to mark completed.
+
+        Returns:
+            order: The updated order instance.
+
+        Raises:
+            ValueError: If the order with the given ID does not exist or inputs are invalid.
+            SQLAlchemyError: If a database error occurs.
+        """
+        logger.info(f"Attempting to mark order {order_id} as completed")
+
+        try:
+            order: Orders = db.session.get(cls, order_id)
+
+            if not order:
+                logger.warning(f"Order with ID {order_id} not found.")
+                raise ValueError(f"Order with ID {order_id} not found.")
+            
+            if order.completed:
+                logger.warning(f"Order {order_id} already completed.")
+                return order
+            
+            order.completed = True
+
+            db.session.commit()
+            logger.info(f"Successfully marked order {order_id} complete.")
+            return order
+
+        except SQLAlchemyError as e:
+            logger.error(f"Database error while marking order {order_id} complete: {e}")
+            db.session.rollback()
+            raise
 
     @classmethod
-    def mark_paid(cls, order_id: int):
-        pass # add price parameter
+    def mark_paid(cls, order_id: int) -> "Orders":
+        """
+        Marks an order as paid.
+
+        Args:
+            order_id (int): The ID of the order to update.
+
+        Returns:
+            order: The updated order instance.
+
+        Raises:
+            ValueError: If the order with the given ID does not exist or inputs are invalid.
+            SQLAlchemyError: If a database error occurs.
+        """
+        logger.info(f"Attempting to mark order {order_id} as paid")
+
+        try:
+            order: Orders = db.session.get(cls, order_id)
+
+            if not order:
+                logger.warning(f"Order with ID {order_id} not found.")
+                raise ValueError(f"Order with ID {order_id} not found.")
+            
+            if order.paid:
+                logger.warning(f"Order {order_id} already paid for.")
+                return order
+            
+            order.paid = True
+
+            db.session.commit()
+            logger.info(f"Successfully marked order {order_id} paid.")
+            return order
+
+        except SQLAlchemyError as e:
+            logger.error(f"Database error while marking order {order_id} paid: {e}")
+            db.session.rollback()
+            raise 
 
     @classmethod
-    def assign_stringer(cls, order_id: int, stringer: str):
-        pass # add stringer parameter and also get by stringer
+    def assign_stringer(cls, order_id: int, stringer: str) -> "Orders":
+        """
+        Assigns a stringer to the order.
 
-    # also add grips parameter and an additional notes parameter
+        Args:
+            order_id (int): The ID of the order to update.
+            stringer(str): Name of the stringer.
+
+        Returns:
+            order: The updated order instance.
+
+        Raises:
+            ValueError: If the order with the given ID does not exist or inputs are invalid.
+            SQLAlchemyError: If a database error occurs.
+        """
+        logger.info(f"Attempting to assign {stringer} to order {order_id}.")
+
+        try:
+            order: Orders = db.session.get(cls, order_id)
+
+            if not order:
+                logger.warning(f"Order with ID {order_id} not found.")
+                raise ValueError(f"Order with ID {order_id} not found.")
+            
+            if stringer is None or not isinstance(stringer, str):
+                raise ValueError(f"stringer must be a non-empty string")
+            
+            if order.stringer:
+                logger.warning(f"{order.stringer} already assigned to this order. Reassigning to {stringer}...")
+
+            order.stringer = stringer
+
+            db.session.commit()
+            logger.info(f"Successfully assigned {stringer} to order {order_id}.")
+            return order
+
+        except SQLAlchemyError as e:
+            logger.error(f"Database error while assigning {stringer} to  order {order_id}: {e}")
+            db.session.rollback()
+            raise
 
