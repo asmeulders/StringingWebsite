@@ -214,7 +214,7 @@ def test_delete_order_not_found(app, session):
     with pytest.raises(ValueError, match="not found"):
         Orders.delete_order(999)
 
-def test_delete_order_by_customer(session, order_wilson: Orders): # should these really be assert is None? i guess so...
+def test_delete_order_by_customer(session, order_wilson: Orders): # should these really be assert is None? i guess so... should i also make a test where they do find one?
     """Test deleting a order by target."""
     Orders.delete_order_by_customer(order_wilson.customer)
     deleted = session.query(Orders).filter_by(customer=order_wilson.customer).first()

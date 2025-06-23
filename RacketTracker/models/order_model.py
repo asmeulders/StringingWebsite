@@ -1064,69 +1064,6 @@ class Orders(db.Model):
             logger.error(f"Database error while deleting order with completion {completed}: {e}")
             db.session.rollback()
             raise
-    
-# ###############################################
-# # Progress Notes 
-# ###############################################
-#     def log_workout_session(self, amount: Union[float, int], exercise_type: str, duration: int, intensity: str, note: str = "") -> str:
-#         """
-#         Logs a workout session with progress and updates status.
-
-#         Args:
-#             amount (float, int): The amount to add to order progress.
-#             exercise_type (str): The type of exercise performed (e.g., "Running").
-#             duration (int): The duration of the workout in minutes.
-#             intensity (str): The intensity of the workout (e.g., "Low", "Moderate", "High").
-#             note (str): An optional personal note about the session.
-
-#         Raises:
-#             ValueError: If the amount is not positive.
-#             SQLAlchemyError: For any database-related issues.
-
-#         Returns:
-#             str: A message indicating progress update or completion.
-#         """
-#         logger.info("Logging workout session...")
-#         if amount <= 0:
-#             raise ValueError("Progress amount must be positive.")
-
-#         if self.order_progress is None:
-#             self.order_progress = 0.0
-
-#         self.order_progress += amount
-
-#         workout_note = f"{exercise_type} - {duration} min - {intensity}"
-#         if note:
-#             workout_note += f" | Note: {note}"
-
-#         logger.info(workout_note)
-
-#         percent = ((float)(self.order_progress) / self.order_value) * 100
-
-#         if self.order_progress >= self.order_value:
-#             self.completed = True
-#             message = f"order completed! Total progress: {percent:.1f}%"
-#         else:
-#             message = f"Workout logged. Progress: {percent:.1f}% complete."
-
-#         db.session.commit()
-#         return message
-
-#     # Helper methods
-#     def get_progress_notes(self) -> list[str]:
-#         """Returns progress notes as a list of strings."""
-#         logger.info("Getting previous progress notes...")
-#         try:
-#             return json.loads(self.progress_notes or "[]")
-#         except (TypeError, json.JSONDecodeError):
-#             return []
-
-#     def add_progress_note(self, note: str) -> None:
-#         """Appends a note to the progress_notes list."""
-#         notes = self.get_progress_notes()
-#         logger.info("Adding new progress notes...")
-#         notes.append(note)
-#         self.progress_notes = json.dumps(notes)
 
 
 # ###############################################
@@ -1257,37 +1194,6 @@ class Orders(db.Model):
             logger.error(f"Database error while retrieving orders by completion status '{completed}': {e}")
             raise
 
-# # Recommendations
-#     @classmethod
-#     def get_exercise_recommendations(cls, order_id: int) -> list[dict]:
-#         """
-#         Gets exercise recommendations from ExerciseDB based on a order's target.
-
-#         Args:
-#             order_id (int): The ID of the order.
-
-#         Returns:
-#             list[dict]: A list of recommended exercises.
-
-#         Raises:
-#             ValueError: If the order is not found.
-#             RuntimeError: If the external API call fails.
-#         """
-#         logger.info(f"Fetching exercise recommendations for order ID {order_id}")
-
-#         order = cls.query.get(order_id)
-#         if not order:
-#             logger.warning(f"order with ID {order_id} not found.")
-#             raise ValueError(f"order with ID {order_id} not found.")
-
-#         try:
-#             exercises = fetch_recommendation(order.target)
-#             logger.info(f"Successfully found {len(exercises)} exercise(s) for order with ID {order_id}")
-#             return exercises
-#         except RuntimeError as e:
-#             logger.error(f"Failed to fetch exercise recommendations: {e}")
-#             raise
-
     @classmethod
     def get_all_orders(cls) -> list[dict]:
         """
@@ -1334,6 +1240,7 @@ class Orders(db.Model):
 ##########################################
 # Update orders
 ##########################################
+
     @classmethod
     def update_order(
         cls,
@@ -1434,35 +1341,17 @@ class Orders(db.Model):
             db.session.rollback()
             raise
 
-    # def log_progress(self, amount: Union[float, int]) -> str:
-    #     """
-    #     Logs workout progress toward a order, updates completion status, and calculates percentage progress.
+    @classmethod
+    def mark_completed(cls, order_id: int):
+        pass
 
-    #     Args:
-    #         amount (float): The amount of progress to add.
+    @classmethod
+    def mark_paid(cls, order_id: int):
+        pass # add price parameter
 
-    #     Returns:
-    #         str: A message indicating the current progress percentage or order completion.
+    @classmethod
+    def assign_stringer(cls, order_id: int, stringer: str):
+        pass # add stringer parameter and also get by stringer
 
-    #     Raises:
-    #         ValueError: If the amount is invalid or negative.
-    #     """
-    #     if amount <= 0:
-    #         raise ValueError("Progress amount must be positive.")
+    # also add grips parameter and an additional notes parameter
 
-    #     if self.order_progress is None:
-    #         self.order_progress = 0.0
-
-    #     self.order_progress += amount
-
-    #     progress_percent = ((float)(self.order_progress) / self.order_value) * 100
-
-    #     if self.order_progress >= self.order_value:
-    #         self.completed = True
-    #         message = f"order completed! Progress: {progress_percent:.1f}%"
-    #     else:
-    #         #self.completed = False
-    #         message = f"Progress updated: {progress_percent:.1f}% complete."
-
-    #     db.session.commit() 
-    #     return message
