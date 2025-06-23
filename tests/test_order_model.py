@@ -215,23 +215,23 @@ def test_delete_order_not_found(app, session):
     with pytest.raises(ValueError, match="not found"):
         Orders.delete_order(999)
 
-# def test_delete_order_by_target(session, order_biceps):
-#     """Test deleting a order by target."""
-#     orders.delete_order_by_target(order_biceps.target)
-#     deleted = session.query(orders).filter_by(target=order_biceps.target).first()
-#     assert deleted is None
+def test_delete_order_by_customer(session, order_wilson: Orders): # should these really be assert is None? i guess so...
+    """Test deleting a order by target."""
+    Orders.delete_order_by_customer(order_wilson.customer)
+    deleted = session.query(Orders).filter_by(customer=order_wilson.customer).first()
+    assert deleted is None
 
-# def test_delete_order_by_order_value(session, order_biceps):
-#     """Test deleting a order by order_value."""
-#     orders.delete_order_by_order_value(order_biceps.order_value)
-#     deleted = session.query(orders).filter_by(order_value=order_biceps.order_value).first()
-#     assert deleted is None
+def test_delete_order_by_order_date(session, order_wilson: Orders):
+    """Test deleting a order by order_value."""
+    Orders.delete_order_by_order_date(order_wilson.order_date)
+    deleted = session.query(Orders).filter_by(order_date=order_wilson.order_date).first()
+    assert deleted is None
 
-# def test_delete_order_by_completed(session, order_biceps):
-#     """Test deleting a order by completed status."""
-#     orders.delete_order_by_completed(order_biceps.completed)
-#     deleted = session.query(orders).filter_by(completed=order_biceps.completed).first()
-#     assert deleted is None
+def test_delete_order_by_completed(session, order_wilson: Orders):
+    """Test deleting a order by completed status."""
+    Orders.delete_order_by_completed(order_wilson.completed)
+    deleted = session.query(Orders).filter_by(completed=order_wilson.completed).first()
+    assert deleted is None
 
 # --- Log Progress ---
 # def test_log_progress_updated(session, order_biceps):

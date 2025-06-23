@@ -978,92 +978,92 @@ class Orders(db.Model):
             db.session.rollback()
             raise
 
-#     @classmethod
-#     def delete_goal_by_target(cls, target: str) -> None:
-#         """
-#         Permanently deletes a goal by target.
+    @classmethod
+    def delete_order_by_customer(cls, customer: str) -> None:
+        """
+        Permanently deletes an order by customer.
 
-#         Args:
-#             target (str): A target muscle group the user wants to work on.
+        Args:
+            customer (str): The name of the customer.
 
-#         Raises:
-#             ValueError: If the goal with the given target does not exist.
-#             SQLAlchemyError: For any database-related issues.
-#         """
-#         logger.info(f"Received request to delete goal with ID {target}")
+        Raises:
+            ValueError: If the goal with the given customer does not exist.
+            SQLAlchemyError: For any database-related issues.
+        """
+        logger.info(f"Received request to delete order with customer {customer}")
 
-#         try:
-#             goal = cls.query.filter_by(target=target).first() 
-#             if not goal:
-#                 logger.warning(f"Attempted to delete non-existent goal with target {target}")
-#                 raise ValueError(f"Goal with target {target} not found")
+        try:
+            order = cls.query.filter_by(customer=customer).first() 
+            if not order:
+                logger.warning(f"Attempted to delete non-existent order with customer {customer}")
+                raise ValueError(f"Order with target {customer} not found")
 
-#             db.session.delete(goal)
-#             db.session.commit()
-#             logger.info(f"Successfully deleted goal with target {target}")
+            db.session.delete(order)
+            db.session.commit()
+            logger.info(f"Successfully deleted order with customer {customer}")
 
-#         except SQLAlchemyError as e:
-#             logger.error(f"Database error while deleting goal with target {target}: {e}")
-#             db.session.rollback()
-#             raise
+        except SQLAlchemyError as e:
+            logger.error(f"Database error while deleting order with target {customer}: {e}")
+            db.session.rollback()
+            raise
 
-#     @classmethod
-#     def delete_goal_by_goal_value(cls, goal_value: int) -> None:
-#         """
-#         Permanently deletes a goal by the goal value.
+    @classmethod
+    def delete_order_by_order_date(cls, order_date: date) -> None:
+        """
+        Permanently deletes an order by the order date.
 
-#         Args:
-#             goal_value (int): A value the user wants to reach for a specific goal.
+        Args:
+            order_date (int): The date of a given order.
 
-#         Raises:
-#             ValueError: If the goal with the given goal value does not exist.
-#             SQLAlchemyError: For any database-related issues.
-#         """
-#         logger.info(f"Received request to delete goal with goal value {goal_value}")
+        Raises:
+            ValueError: If the order with the given order value does not exist.
+            SQLAlchemyError: For any database-related issues.
+        """
+        logger.info(f"Received request to delete order with date {order_date}")
 
-#         try:
-#             goal = cls.query.filter_by(goal_value=goal_value).first()
-#             if not goal:
-#                 logger.warning(f"Attempted to delete non-existent goal with goal value {goal_value}")
-#                 raise ValueError(f"Goal with goal value {goal_value} not found")
+        try:
+            order = cls.query.filter_by(order_date=order_date).first()
+            if not order:
+                logger.warning(f"Attempted to delete non-existent order with date {order_date}")
+                raise ValueError(f"Order with order value {order_date} not found")
 
-#             db.session.delete(goal)
-#             db.session.commit()
-#             logger.info(f"Successfully deleted goal with goal value {goal_value}")
+            db.session.delete(order)
+            db.session.commit()
+            logger.info(f"Successfully deleted order with date {order_date}")
 
-#         except SQLAlchemyError as e:
-#             logger.error(f"Database error while deleting goal with goal value {goal_value}: {e}")
-#             db.session.rollback()
-#             raise
+        except SQLAlchemyError as e:
+            logger.error(f"Database error while deleting order with date {order_date}: {e}")
+            db.session.rollback()
+            raise
     
-#     @classmethod
-#     def delete_goal_by_completed(cls, completed: bool) -> None:
-#         """
-#         Permanently deletes a goal by the completion status.
+    @classmethod
+    def delete_order_by_completed(cls, completed: bool) -> None:
+        """
+        Permanently deletes a order by the completion status.
 
-#         Args:
-#             completed (bool): The completion status of that goal 
+        Args:
+            completed (bool): The completion status of that order. 
 
-#         Raises:
-#             ValueError: If the goal with the given completion status does not exist.
-#             SQLAlchemyError: For any database-related issues.
-#         """
-#         logger.info(f"Received request to delete goal with completion status {completed}")
+        Raises:
+            ValueError: If the order with the given completion status does not exist.
+            SQLAlchemyError: For any database-related issues.
+        """
+        logger.info(f"Received request to delete order with completion status {completed}")
 
-#         try:
-#             goal = cls.query.filter_by(completed=completed).first()
-#             if not goal:
-#                 logger.warning(f"Attempted to delete non-existent goal with completion {completed}")
-#                 raise ValueError(f"Goal with completion {completed} not found")
+        try:
+            order = cls.query.filter_by(completed=completed).first()
+            if not order:
+                logger.warning(f"Attempted to delete non-existent order with completion {completed}")
+                raise ValueError(f"Order with completion {completed} not found")
 
-#             db.session.delete(goal)
-#             db.session.commit()
-#             logger.info(f"Successfully deleted goal with completion {completed}")
+            db.session.delete(order)
+            db.session.commit()
+            logger.info(f"Successfully deleted order with completion {completed}")
 
-#         except SQLAlchemyError as e:
-#             logger.error(f"Database error while deleting goal with completion {completed}: {e}")
-#             db.session.rollback()
-#             raise
+        except SQLAlchemyError as e:
+            logger.error(f"Database error while deleting order with completion {completed}: {e}")
+            db.session.rollback()
+            raise
     
 # ###############################################
 # # Progress Notes 
