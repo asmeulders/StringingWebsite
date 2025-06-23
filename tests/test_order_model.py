@@ -136,32 +136,31 @@ def test_get_order_by_id_not_found(app, session):
     with pytest.raises(ValueError, match="Order with ID 999 not found"):
         Orders.get_order_by_id(999)
 
-# def test_get_order_target(order_biceps):
-#     """Test target field value of a order."""
-#     fetched = Orders.get_order_by_id(order_biceps.id)
-#     assert fetched.target == "biceps"
+def test_get_orders_by_customer(order_wilson: Orders):
+    """Test target field value of a order."""
+    fetched = Orders.get_orders_by_customer(order_wilson.customer)
+    assert fetched[0].racket == "Wilson Pro Staff"
 
-# def test_get_order_by_target_not_found(app, session):
-#     """Test error when fetching nonexistent order by target."""
-#     with pytest.raises(ValueError, match="No orders found with target 'nonexistent_target'"):
-#         orders.get_orders_by_target("nonexistent_target")
+def test_get_orders_by_customer_not_found(app, session):
+    """Test error when fetching nonexistent order by target."""
+    with pytest.raises(ValueError, match="No orders found for customer 'nonexistent_customer'"):
+        Orders.get_orders_by_customer("nonexistent_customer")
 
-# def test_get_order_value(order_biceps):
-#     """Test order_value field of a order."""
-#     fetched = orders.get_order_by_id(order_biceps.id)
-#     assert isinstance(fetched.order_value, int)
-#     assert fetched.order_value == order_biceps.order_value
+def test_get_orders_by_order_date(order_wilson: Orders):
+    """Test order_date field of a order."""
+    fetched = Orders.get_orders_by_order_date(order_wilson.order_date)
+    assert fetched[0].order_date == order_wilson.order_date
 
-# def test_get_order_by_order_value_not_found(app, session):
-#     """Test error when fetching nonexistent order by order_value."""
-#     with pytest.raises(ValueError, match="No orders found with order value '9999'"):
-#         orders.get_orders_by_order_value(9999)
+def test_get_order_by_order_date_not_found(app, session):
+    """Test error when fetching nonexistent order by order_value."""
+    with pytest.raises(ValueError, match="No orders found with date '01/01/1111'"):
+        Orders.get_orders_by_order_date(date(1111, 1, 1))
 
-# def test_get_order_completed(order_biceps):
-#     """Test completed field of a order."""
-#     fetched = orders.get_order_by_id(order_biceps.id)
-#     assert isinstance(fetched.completed, bool)
-#     assert fetched.completed == order_biceps.completed
+def test_get_orders_by_completed(order_wilson: Orders):
+    """Test completed field of a order."""
+    fetched = Orders.get_orders_by_completed(order_wilson.completed)
+    assert fetched[0].completed == order_wilson.completed
+
 # --- Get All orders ---
 
 def test_get_all_orders(session, order_wilson: Orders, order_head: Orders):
