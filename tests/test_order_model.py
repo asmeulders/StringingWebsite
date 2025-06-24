@@ -217,15 +217,35 @@ def test_mark_completed(session, order_wilson: Orders):
     complete_order = Orders.mark_completed(order_wilson.order_id)
     assert complete_order.completed == True
 
+def test_mark_completed_not_found(session, order_wilson: Orders):
+    """Test error when completing nonexistent order by ID."""
+    with pytest.raises(ValueError, match="Order with ID 999 not found"):
+        Orders.mark_completed(999)
+
 def test_mark_paid(session, order_wilson: Orders):
     """Test marking an order as paid."""
     paid_order = Orders.mark_paid(order_wilson.order_id)
     assert paid_order.paid == True
 
+def test_mark_paid_not_found(session, order_wilson: Orders):
+    """Test error when completing nonexistent order by ID."""
+    with pytest.raises(ValueError, match="Order with ID 999 not found"):
+        Orders.mark_paid(999)
+
 def test_assign_stringer(session, order_head: Orders):
     """Test assigning a stringer to an order."""
-    order: Orders = Orders.assign_stringer(order_head.order_id, "Kempton")
+    order: Orders = Orders.assign_stringer(order_head.order_id, "Kempton") # MAKE FAILURE TESTS NEXT
     assert order.stringer == "Kempton"
+
+def test_assign_stringer_not_found(session, order_head: Orders):
+    """Test error when completing nonexistent order by ID."""
+    with pytest.raises(ValueError, match="Order with ID 999 not found"):
+        Orders.assign_stringer(999, "Kempton")
+
+def test_assign_stringer_invalid_stringer(session, order_head: Orders):
+    """Test error when completing nonexistent order by ID."""
+    with pytest.raises(ValueError, match="stringer must be a non-empty string"):
+        Orders.assign_stringer(order_head.order_id, 1)
 
 # --- Delete order ---
 
