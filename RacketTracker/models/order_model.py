@@ -944,7 +944,7 @@ class Orders(db.Model):
             db.session.add(order)
             db.session.commit()
             paid_message = "Paid" if paid else "Unpaid"
-            logger.info(f"Order created. {order_date.strftime('%m%d%y')} - {customer}: {racket} - {paid_message}")
+            logger.info(f"Order created. {order_date.strftime('%Y%m%d')} - {customer}: {racket} - {paid_message}")
 
         except SQLAlchemyError as e:
             logger.error(f"Database error while creating order: {e}")
@@ -1025,20 +1025,20 @@ class Orders(db.Model):
             ValueError: If the order with the given order value does not exist.
             SQLAlchemyError: For any database-related issues.
         """
-        logger.info(f"Received request to delete order with date {order_date.strftime('%m/%d/%Y')}")
+        logger.info(f"Received request to delete order with date {order_date.strftime('%Y%m%d')}")
 
         try:
             order = cls.query.filter_by(order_date=order_date).first()
             if not order:
-                logger.warning(f"Attempted to delete non-existent order with date {order_date.strftime('%m/%d/%Y')}")
-                raise ValueError(f"Order with order value {order_date.strftime('%m/%d/%Y')} not found")
+                logger.warning(f"Attempted to delete non-existent order with date {order_date.strftime('%Y%m%d')}")
+                raise ValueError(f"Order with order value {order_date.strftime('%Y%m%d')} not found")
 
             db.session.delete(order)
             db.session.commit()
-            logger.info(f"Successfully deleted order with date {order_date.strftime('%m/%d/%Y')}")
+            logger.info(f"Successfully deleted order with date {order_date.strftime('%Y%m%d')}")
 
         except SQLAlchemyError as e:
-            logger.error(f"Database error while deleting order with date {order_date.strftime('%m/%d/%Y')}: {e}")
+            logger.error(f"Database error while deleting order with date {order_date.strftime('%Y%m%d')}: {e}")
             db.session.rollback()
             raise
     
@@ -1153,20 +1153,20 @@ class Orders(db.Model):
             ValueError: If no orders with the given date are found.
             SQLAlchemyError: If a database error occurs.
         """
-        logger.info(f"Attempting to retrieve all orders with date '{order_date.strftime('%m/%d/%Y')}'")
+        logger.info(f"Attempting to retrieve all orders with date '{order_date.strftime('%Y%m%d')}'")
 
         try:
             orders = cls.query.filter_by(order_date=order_date).all()
 
             if not orders:
-                logger.info(f"No orders found with date '{order_date.strftime('%m/%d/%Y')}'")
-                raise ValueError(f"No orders found with date '{order_date.strftime('%m/%d/%Y')}'")
+                logger.info(f"No orders found with date '{order_date.strftime('%Y%m%d')}'")
+                raise ValueError(f"No orders found with date '{order_date.strftime('%Y%m%d')}'")
 
-            logger.info(f"Successfully retrieved {len(orders)} order(s) with order value '{order_date.strftime('%m/%d/%Y')}'")
+            logger.info(f"Successfully retrieved {len(orders)} order(s) with order value '{order_date.strftime('%Y%m%d')}'")
             return orders
 
         except SQLAlchemyError as e:
-            logger.error(f"Database error while retrieving orders by date '{order_date.strftime('%m/%d/%Y')}': {e}")
+            logger.error(f"Database error while retrieving orders by date '{order_date.strftime('%Y%m%d')}': {e}")
             raise
 
     @classmethod
@@ -1299,7 +1299,7 @@ class Orders(db.Model):
                 order.customer = customer
 
             if order_date is not None:
-                if not isinstance(order_date, str):
+                if not isinstance(order_date, date):
                     raise ValueError("order_date must be a date object.")
                 order.order_date = order_date
 
