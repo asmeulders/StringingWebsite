@@ -913,8 +913,8 @@ class Orders(db.Model):
             crosses_tension (int, optional): Tension of the crosses.
             mains_string (int): Name of the string used on the mains.
             crosses_string (int, optional): Name of the string used on the crosses.
-            replacement_grip(str, optional): Name of the replacement grip to be used.
-            paid (bool, optional): Paid status of the order.
+            replacement_grip(str, optional): Name of the replacement grip desired.
+            paid (bool, optional): Boolean for paid status of the order.
 
         Raises:
             ValueError: If any field is invalid. 
@@ -1461,4 +1461,3 @@ class Orders(db.Model):
             logger.error(f"Database error while assigning {stringer} to  order {order_id}: {e}")
             db.session.rollback()
             raise
-

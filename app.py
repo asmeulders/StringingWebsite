@@ -8,11 +8,25 @@ from RacketTracker.db import db
 from RacketTracker.models.order_model import Orders
 from RacketTracker.models.user_model import Users
 from RacketTracker.utils.logger import configure_logger
+from datetime import date
+import datetime
+from werkzeug.routing import BaseConverter
+from pydantic import ValidationError
 
 
 load_dotenv()
 
+class DateConverter(BaseConverter):
+    """Extracts a ISO8601 date from the path and validates it."""
+    def to_python(self, value):
+        try:
+            return datetime.strptime(value, '%Y%m%d').date()
+        except ValueError:
+            raise ValidationError()
 
+    def to_url(self, value):
+        return value.strftime('%Y%m%d')
+    
 def create_app(config_class=ProductionConfig) -> Flask:
     """Create a Flask application with the specified configuration.
 
@@ -27,6 +41,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
     configure_logger(app.logger)
 
     app.config.from_object(config_class)
+    app.url_map.converters['date'] = DateConverter
 
     # Initialize database
     db.init_app(app)
@@ -258,472 +273,552 @@ def create_app(config_class=ProductionConfig) -> Flask:
 
     # ##########################################################
     # #
-    # # Goals
+    # # orders
     # #
     # ##########################################################
 
-    # @app.route('/api/reset-goals', methods=['DELETE'])
-    # def reset_goals() -> Response:
-    #     """Recreate the goals table to delete goals.
+    @app.route('/api/reset-orders', methods=['DELETE'])
+    def reset_orders() -> Response:
+        """Recreate the orders table to delete orders.
 
-    #     Returns:
-    #         JSON response indicating the success of recreating the goals table.
+        Returns:
+            JSON response indicating the success of recreating the orders table.
 
-    #     Raises:
-    #         500 error if there is an issue recreating the goals table.
-    #     """
-    #     try:
-    #         app.logger.info("Received request to recreate goals table")
-    #         with app.app_context():
-    #             Goals.__table__.drop(db.engine)
-    #             Goals.__table__.create(db.engine)
-    #         app.logger.info("Goals table recreated successfully")
-    #         return make_response(jsonify({
-    #             "status": "success",
-    #             "message": f"Goals table recreated successfully"
-    #         }), 200)
+        Raises:
+            500 error if there is an issue recreating the orders table.
+        """
+        try:
+            app.logger.info("Received request to recreate orders table")
+            with app.app_context():
+                Orders.__table__.drop(db.engine)
+                Orders.__table__.create(db.engine)
+            app.logger.info("Orders table recreated successfully")
+            return make_response(jsonify({
+                "status": "success",
+                "message": f"Orders table recreated successfully"
+            }), 200)
 
-    #     except Exception as e:
-    #         app.logger.error(f"Goals table recreation failed: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error",
-    #             "message": "An internal error occurred while deleting users",
-    #             "details": str(e)
-    #         }), 500)
+        except Exception as e:
+            app.logger.error(f"Orders table recreation failed: {e}")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "An internal error occurred while deleting orders",
+                "details": str(e)
+            }), 500)
 
 
-    # @app.route('/api/create-goal', methods=['POST'])
-    # @login_required
-    # def add_goal() -> Response:
-    #     """Route to create a new goal.
+    @app.route('/api/create-order', methods=['POST'])
+    @login_required
+    def add_order() -> Response:
+        """Route to create a new order.
 
-    #     Expected JSON Input:
-    #         - target (str): The goal's target muscle group.
-    #         - goal_value (int): The goal's target to reach.
-    #         - goal_progress (float, int): The current progress towards the goal.
-    #         - completed (bool): Boolean for if the goal is completed.
+        Expected JSON Input:
+            - customer (str): The customer who made the order.
+            - order_date (date): The date of the order.
+            - racket (str): The name of the racket.
+            - mains_tension (int): Value of the mains tension.
+            - crosses_tension (int): Value of the crosses tension.
+            - mains_string (str): Name of the string used on the mains.
+            - crosses_string (str): Name of the string used on the crosses.
+            - replacement_grip (str): Name of the replacement grip desired.
+            - paid (bool): Boolean for paid status of order.
 
-    #     Returns:
-    #         JSON response indicating the success of the goal addition.
+        Returns:
+            JSON response indicating the success of the order addition.
 
-    #     Raises:
-    #         400 error if input validation fails.
-    #         500 error if there is an issue adding the goal to the plan.
+        Raises:
+            400 error if input validation fails.
+            500 error if there is an issue adding the order to the plan.
 
-    #     """
-    #     app.logger.info("Received request to add a new goal")
+        """
+        app.logger.info("Received request to add a new order")
 
-    #     try:
-    #         data = request.get_json()
+        try:
+            data = request.get_json()
 
-    #         required_fields = ["target", "goal_value", "goal_progress", "completed"]
-    #         missing_fields = [field for field in required_fields if field not in data]
+            required_fields = ["customer", "order_date", "racket", "mains_tension", "crosses_tension", "mains_string", "crosses_string", "replacement_grip", "paid"]
+            missing_fields = [field for field in required_fields if field not in data]
 
-    #         if missing_fields:
-    #             app.logger.warning(f"Missing required fields: {missing_fields}")
-    #             return make_response(jsonify({
-    #                 "status": "error",
-    #                 "message": f"Missing required fields: {', '.join(missing_fields)}"
-    #             }), 400)
+            if missing_fields:
+                app.logger.warning(f"Missing required fields: {missing_fields}")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": f"Missing required fields: {', '.join(missing_fields)}"
+                }), 400)
 
-    #         target = data["target"]
-    #         goal_value = data["goal_value"]
-    #         goal_progress = data["goal_progress"]
-    #         completed = data["completed"]
+            customer = data["customer"]
+            stringer = data["stringer"]
+            order_date = data["order_date"]
+            racket = data["racket"]
+            mains_tension = data["mains_tension"]
+            mains_string = data["mains_string"]
+            crosses_tension = data["crosses_tension"]
+            crosses_string = data["crosses_string"]
+            replacement_grip = data["replacement_grip"]
+            paid = data["paid"]
 
-    #         if (
-    #             not isinstance(target, str)
-    #         ):
-    #             app.logger.warning("Invalid input data types - target")
-    #             return make_response(jsonify({
-    #                 "status": "error",
-    #                 "message": "Invalid input types: target should be a string"
-    #             }), 400)
+            if (
+                not isinstance(customer, str)
+            ):
+                app.logger.warning("Invalid input data types - customer")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": "Invalid input types: customer should be a string"
+                }), 400)
             
-    #         if (
-    #             not isinstance(goal_value, int)
-    #         ):
-    #             app.logger.warning("Invalid input data types - goal_value")
-    #             return make_response(jsonify({
-    #                 "status": "error",
-    #                 "message": "Invalid input types: goal_value should be an int"
-    #             }), 400)
+            if (
+                not isinstance(stringer, str)
+            ):
+                app.logger.warning("Invalid input data types - stringer")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": "Invalid input types: stringer should be a string"
+                }), 400)
             
-    #         if (
-    #             not isinstance(goal_progress, (float))
-    #         ):
-    #             app.logger.warning("Invalid input data types - goal_progress")
-    #             return make_response(jsonify({
-    #                 "status": "error",
-    #                 "message": "Invalid input types: goal_progress should be a float or an int"
-    #             }), 400)
+            if (
+                not isinstance(order_date, date)
+            ):
+                app.logger.warning("Invalid input data types - order_date")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": "Invalid input types: order_date should be a date object"
+                }), 400)
             
-    #         if (
-    #             not isinstance(completed, bool)
-    #         ):
-    #             app.logger.warning("Invalid input data types - completed")
-    #             return make_response(jsonify({
-    #                 "status": "error",
-    #                 "message": "Invalid input types: completed should be a bool"
-    #             }), 400)
+            if (
+                not isinstance(racket, str)
+            ):
+                app.logger.warning("Invalid input data types - racket")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": "Invalid input types: racket should be a string"
+                }), 400)
+            
+            if (
+                not isinstance(mains_tension, int)
+            ):
+                app.logger.warning("Invalid input data types - mains_tension")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": "Invalid input types: mains_tension should be an int"
+                }), 400)
+            
+            if (
+                not isinstance(mains_string, str)
+            ):
+                app.logger.warning("Invalid input data types - mains_string")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": "Invalid input types: mains_string should be a string"
+                }), 400)
+            
+            if (
+                not isinstance(crosses_tension, int)
+            ):
+                app.logger.warning("Invalid input data types - crosses_tension")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": "Invalid input types: crosses_tension should be an int"
+                }), 400)
+            
+            if (
+                not isinstance(crosses_string, str)
+            ):
+                app.logger.warning("Invalid input data types - crosses_string")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": "Invalid input types: crosses_string should be a string"
+                }), 400)
+            
+            if (
+                not isinstance(replacement_grip, str)
+            ):
+                app.logger.warning("Invalid input data types - replacement_grip")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": "Invalid input types: replacement_grip should be a string"
+                }), 400)
+            
+            if (
+                not isinstance(paid, bool)
+            ):
+                app.logger.warning("Invalid input data types - paid")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": "Invalid input types: paid should be a bool"
+                }), 400)
+            
+            paid_status = "paid" if paid else "unpaid"
 
-    #         app.logger.info(f"Adding goal: {target}, {goal_value}, {goal_progress}, completed = {completed}")
-    #         Goals.create_goal(target=target, goal_value=goal_value, goal_progress=goal_progress, completed=completed)
+            app.logger.info(f"Adding order: {customer} - {racket}: {order_date} - {paid_status}")
+            Orders.create_order(customer=customer, stringer=stringer, order_date=order_date, racket=racket, mains_tension=mains_tension, mains_string=mains_string, crosses_tension=crosses_tension, crosses_string=crosses_string, replacement_grip=replacement_grip, paid=paid)
 
-    #         app.logger.info(f"goal added successfully: {target}, {goal_value}, {goal_progress}, completed = {completed}")
-    #         return make_response(jsonify({
-    #             "status": "success",
-    #             "message": f"goal with target: '{target}', goal_value: '{goal_value}' added successfully"
-    #         }), 201)
+            app.logger.info(f"Order added successfully: {customer} - {racket}: {order_date} - {paid_status}")
+            return make_response(jsonify({
+                "status": "success",
+                "message": f"Order: '{customer} - {racket}: {order_date} - {paid_status}' added successfully"
+            }), 201)
 
-    #     except Exception as e:
-    #         app.logger.error(f"Failed to add goal: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error",
-    #             "message": "An internal error occurred while adding the goal",
-    #             "details": str(e)
-    #         }), 500)
+        except Exception as e:
+            app.logger.error(f"Failed to add order: {e}")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "An internal error occurred while adding the order",
+                "details": str(e)
+            }), 500)
 
 
-    # @app.route('/api/delete-goal/<int:goal_id>', methods=['DELETE'])
+    @app.route('/api/delete-order/<int:order_id>', methods=['DELETE'])
+    @login_required
+    def delete_order(order_id: int) -> Response:
+        """Route to delete a order by ID.
+
+        Path Parameter:
+            - order_id (int): The ID of the order to delete.
+
+        Returns:
+            JSON response indicating success of the operation.
+
+        Raises:
+            400 error if the order does not exist.
+            500 error if there is an issue removing the order from the database.
+
+        """
+        try:
+            app.logger.info(f"Received request to delete order with ID {order_id}")
+
+            # Check if the order exists before attempting to delete
+            order = Orders.get_order_by_id(order_id)
+            if not order:
+                app.logger.warning(f"Order with ID {order_id} not found.")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": f"Order with ID {order_id} not found"
+                }), 400)
+
+            Orders.delete_order(order_id)
+            app.logger.info(f"Successfully deleted order with ID {order_id}")
+
+            return make_response(jsonify({
+                "status": "success",
+                "message": f"Order with ID {order_id} deleted successfully"
+            }), 200)
+
+        except Exception as e:
+            app.logger.error(f"Failed to delete order: {e}")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "An internal error occurred while deleting the order",
+                "details": str(e)
+            }), 500)
+
+
+    @app.route('/api/get-all-orders-from-history', methods=['GET'])
+    @login_required
+    def get_all_orders() -> Response:
+        """Route to retrieve all orders from the history (non-deleted).
+
+        Returns:
+            JSON response containing the list of orders.
+
+        Raises:
+            500 error if there is an issue retrieving orders from the history.
+
+        """
+        try:
+            # Extract query parameter for sorting by play count
+            app.logger.info(f"Received request to retrieve all orders from history")
+
+            orders = Orders.get_all_orders()
+
+            app.logger.info(f"Successfully retrieved {len(orders)} orders from the catalog")
+
+            return make_response(jsonify({
+                "status": "success",
+                "message": "Orders retrieved successfully",
+                "orders": orders
+            }), 200)
+
+        except Exception as e:
+            app.logger.error(f"Failed to retrieve orders: {e}")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "An internal error occurred while retrieving orders",
+                "details": str(e)
+            }), 500)
+
+
+    @app.route('/api/get-order-from-history-by-id/<int:order_id>', methods=['GET'])
+    @login_required
+    def get_order_by_id(order_id: int) -> Response:
+        """Route to retrieve a order by its ID.
+
+        Path Parameter:
+            - order_id (int): The ID of the order.
+
+        Returns:
+            JSON response containing the order details.
+
+        Raises:
+            400 error if the order does not exist.
+            500 error if there is an issue retrieving the order.
+
+        """
+        try:
+            app.logger.info(f"Received request to retrieve order with ID {order_id}")
+
+            order = Orders.get_order_by_id(order_id)
+            if not order:
+                app.logger.warning(f"Order with ID {order_id} not found.")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": f"Order with ID {order_id} not found"
+                }), 400)
+
+            app.logger.info(f"Successfully retrieved order {order.order_id} for {order.customer}")
+
+            return make_response(jsonify({
+                "status": "success",
+                "message": "Order retrieved successfully",
+                "Customer": order.customer
+            }), 200)
+
+        except Exception as e:
+            app.logger.error(f"Failed to retrieve order by ID: {e}")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "An internal error occurred while retrieving the order",
+                "details": str(e)
+            }), 500)
+
+    @app.route('/api/orders/by-customer/<string:customer>', methods=['GET'])
+    @login_required
+    def get_orders_by_customer(customer: str) -> Response:
+        """Route to retrieve all orders by customer.
+
+        Path Parameter:
+            - customer (str): Name of the customer.
+
+        Returns:
+            JSON response with a list of orders for the customer.
+
+        Raises:
+            400 error if no matching orders are found.
+            500 error if there is an issue retrieving the orders.
+        """
+        try:
+            app.logger.info(f"Request to retrieve orders by customer: {customer}")
+            orders = Orders.get_orders_by_customer(customer)
+            return make_response(jsonify({
+                "status": "success",
+                "orders": [g.order_id for g in orders] 
+            }), 200)
+        except ValueError as e:
+            app.logger.warning(f"Order retrieval failed: {e}")
+            return make_response(jsonify({
+                "status": "error",
+                  "message": str(e)
+            }), 400)
+        except Exception as e:
+            app.logger.error(f"Internal error retrieving orders by customer: {e}")
+            return make_response(jsonify({
+                "status": "error", 
+                "message": "Internal server error"
+            }), 500)
+
+    @app.route('/api/orders/by-completed/<string:completed>', methods=['GET'])
+    @login_required
+    def get_orders_by_completed(completed: str) -> Response:
+        """Route to retrieve all orders by completion status.
+
+        Path Parameter:
+            - completed (str): Either 'true' or 'false'.
+
+        Returns:
+            JSON response with a list of matching orders.
+
+        Raises:
+            400 error for invalid boolean input or missing data.
+            500 error for unexpected database issues.
+        """
+        try:
+            app.logger.info(f"Request to retrieve orders by completion status: {completed}")
+            status = completed.lower() == 'true'
+            orders = Orders.get_orders_by_completed(status)
+            return make_response(jsonify({
+                "status": "success",
+                "orders": [g.order_id for g in orders]
+            }), 200)
+        except ValueError as e:
+            app.logger.warning(f"Order retrieval failed: {e}")
+            return make_response(jsonify({"status": "error", "message": str(e)}), 400)
+        except Exception as e:
+            app.logger.error(f"Internal error retrieving completed orders: {e}")
+            return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
+
+    @app.route('/api/orders/by-date/<date:order_date>', methods=['GET'])
+    @login_required
+    def get_orders_by_order_date(order_date: date) -> Response: # should i make this a datetime object instead?
+        """Route to retrieve all orders by order date.
+
+        Path Parameter:
+            - order_date_string (str): The string representation of the date.
+
+        Returns:
+            JSON response with matching orders.
+
+        Raises:
+            400 error if no orders are found.
+            500 error if database issues occur.
+        """
+        try:
+            app.logger.info(f"Request to retrieve orders by order date: {order_date.strftime("%m/%d/%Y")}")
+            orders = Orders.get_orders_by_order_date(order_date)
+            return make_response(jsonify({
+                "status": "success",
+                "orders": [g.order_id for g in orders]
+            }), 200)
+        except ValueError as e:
+            app.logger.warning(f"Order retrieval failed: {e}")
+            return make_response(jsonify({"status": "error", "message": str(e)}), 400)
+        except Exception as e:
+            app.logger.error(f"Error retrieving orders by order value: {e}")
+            return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
+
+    @app.route('/api/update-order/<int:order_id>', methods=['PATCH']) 
+    @login_required
+    def update_order(order_id: int) -> Response:
+        """Route to update a order by ID.
+
+        Path Parameter:
+            - order_id (int): The ID of the order to update.
+
+        Expected JSON Input:
+            - customer (str): The updated customer.
+            - order_date (date): The updated date.
+            - racket (str): The updated name of the racket.
+            - mains_tension (int): Updated value of the mains tension.
+            - crosses_tension (int): Updated value of the crosses tension.
+            - mains_string (str): Updated name of the string used on the mains.
+            - crosses_string (str): Updated name of the string used on the crosses.
+            - replacement_grip (str): Updated name of the replacement grip desired.
+
+        Returns:
+            JSON response with the updated order or error.
+
+        Raises:
+            400 error for invalid input or if order not found.
+            500 error for database issues.
+        """
+        try:
+            data = request.get_json()
+            order = Orders.get_order_by_id(order_id)
+
+            new_customer = data.get("customer")
+            new_order_date = data.get("order_date")
+            new_racket = data.get("racket")
+            new_mains_tension = data.get("mains_tension")
+            new_mains_string = data.get("mains_string")
+            new_crosses_tension = data.get("crosses_tension")
+            new_crosses_string = data.get("crosses_string")
+            new_replacement_grip = data.get("replacement_grip")
+
+
+            old_fields = [order.customer, order.order_date, order.racket, order.mains_tension, order.mains_string, order.crosses_tension, order.crosses_string, order.replacement_grip]
+            new_fields = [new_customer, new_order_date, new_racket, new_mains_tension, new_mains_string, new_crosses_tension, new_crosses_string, new_replacement_grip]
+            updated_fields = []
+
+            for i in range(len(old_fields)):
+                if old_fields[i] != new_fields[i]:
+                    updated_fields.append(new_fields[i])
+
+            updated_order = Orders.update_order(
+                order_id,
+                customer=new_customer,
+                order_date=new_order_date,
+                racket=new_racket,
+                mains_tension=new_mains_tension,
+                mains_string=new_mains_string,
+                crosses_tension=new_crosses_tension,
+                crosses_string=new_crosses_string,
+                replacement_grip=new_replacement_grip,
+            )
+            app.logger.info(f"Updated order ID {order_id} successfully.")
+            return make_response(jsonify({
+                "status": "success", 
+                "order": updated_order.order_id,
+                "updated_fields": updated_fields
+            }), 200)
+        except ValueError as e:
+            app.logger.warning(f"Update failed for order {order_id}: {e}")
+            return make_response(jsonify({
+                "status": "error", 
+                "message": str(e)
+            }), 400)
+        except Exception as e:
+            app.logger.error(f"Internal error updating order {order_id}: {e}")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "Internal server error"
+            }), 500)
+
+    # @app.route('/api/delete-order-by-target/<string:target>', methods=['DELETE'])
     # @login_required
-    # def delete_goal(goal_id: int) -> Response:
-    #     """Route to delete a goal by ID.
+    # def delete_order_by_target(target: str) -> Response:
+    #     """Route to delete a order by target.
 
     #     Path Parameter:
-    #         - goal_id (int): The ID of the goal to delete.
-
-    #     Returns:
-    #         JSON response indicating success of the operation.
-
-    #     Raises:
-    #         400 error if the goal does not exist.
-    #         500 error if there is an issue removing the goal from the database.
-
-    #     """
-    #     try:
-    #         app.logger.info(f"Received request to delete goal with ID {goal_id}")
-
-    #         # Check if the goal exists before attempting to delete
-    #         goal = Goals.get_goal_by_id(goal_id)
-    #         if not goal:
-    #             app.logger.warning(f"Goal with ID {goal_id} not found.")
-    #             return make_response(jsonify({
-    #                 "status": "error",
-    #                 "message": f"goal with ID {goal_id} not found"
-    #             }), 400)
-
-    #         Goals.delete_goal(goal_id)
-    #         app.logger.info(f"Successfully deleted goal with ID {goal_id}")
-
-    #         return make_response(jsonify({
-    #             "status": "success",
-    #             "message": f"goal with ID {goal_id} deleted successfully"
-    #         }), 200)
-
-    #     except Exception as e:
-    #         app.logger.error(f"Failed to delete goal: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error",
-    #             "message": "An internal error occurred while deleting the goal",
-    #             "details": str(e)
-    #         }), 500)
-
-
-    # @app.route('/api/get-all-goals-from-catalog', methods=['GET'])
-    # @login_required
-    # def get_all_goals() -> Response:
-    #     """Route to retrieve all goals in the catalog (non-deleted), with an option to sort by target.
-
-    #     Returns:
-    #         JSON response containing the list of goals.
-
-    #     Raises:
-    #         500 error if there is an issue retrieving goals from the catalog.
-
-    #     """
-    #     try:
-    #         # Extract query parameter for sorting by play count
-    #         app.logger.info(f"Received request to retrieve all goals from catalog")
-
-    #         goals = Goals.get_all_goals()
-
-    #         app.logger.info(f"Successfully retrieved {len(goals)} goals from the catalog")
-
-    #         return make_response(jsonify({
-    #             "status": "success",
-    #             "message": "goals retrieved successfully",
-    #             "goals": goals
-    #         }), 200)
-
-    #     except Exception as e:
-    #         app.logger.error(f"Failed to retrieve goals: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error",
-    #             "message": "An internal error occurred while retrieving goals",
-    #             "details": str(e)
-    #         }), 500)
-
-
-    # @app.route('/api/get-goal-from-catalog-by-id/<int:goal_id>', methods=['GET'])
-    # @login_required
-    # def get_goal_by_id(goal_id: int) -> Response:
-    #     """Route to retrieve a goal by its ID.
-
-    #     Path Parameter:
-    #         - goal_id (int): The ID of the goal.
-
-    #     Returns:
-    #         JSON response containing the goal details.
-
-    #     Raises:
-    #         400 error if the goal does not exist.
-    #         500 error if there is an issue retrieving the goal.
-
-    #     """
-    #     try:
-    #         app.logger.info(f"Received request to retrieve goal with ID {goal_id}")
-
-    #         goal = Goals.get_goal_by_id(goal_id)
-    #         if not goal:
-    #             app.logger.warning(f"Goal with ID {goal_id} not found.")
-    #             return make_response(jsonify({
-    #                 "status": "error",
-    #                 "message": f"Goal with ID {goal_id} not found"
-    #             }), 400)
-
-    #         app.logger.info(f"Successfully retrieved goal with target {goal.target}")
-
-    #         return make_response(jsonify({
-    #             "status": "success",
-    #             "message": "Goal retrieved successfully",
-    #             "target": goal.target
-    #         }), 200)
-
-    #     except Exception as e:
-    #         app.logger.error(f"Failed to retrieve goal by ID: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error",
-    #             "message": "An internal error occurred while retrieving the goal",
-    #             "details": str(e)
-    #         }), 500)
-
-    # @app.route('/api/goals/by-target/<string:target>', methods=['GET'])
-    # @login_required
-    # def get_goals_by_target(target: str) -> Response:
-    #     """Route to retrieve all goals by target.
-
-    #     Path Parameter:
-    #         - target (str): The target muscle group.
-
-    #     Returns:
-    #         JSON response with a list of goals that match the target.
-
-    #     Raises:
-    #         400 error if no matching goals are found.
-    #         500 error if there is an issue retrieving the goals.
-    #     """
-    #     try:
-    #         app.logger.info(f"Request to retrieve goals by target: {target}")
-    #         goals = Goals.get_goals_by_target(target)
-    #         return make_response(jsonify({
-    #             "status": "success",
-    #             "goals": [g.id for g in goals] 
-    #         }), 200)
-    #     except ValueError as e:
-    #         app.logger.warning(f"Goal retrieval failed: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error",
-    #               "message": str(e)
-    #         }), 400)
-    #     except Exception as e:
-    #         app.logger.error(f"Internal error retrieving goals by target: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error", 
-    #             "message": "Internal server error"
-    #         }), 500)
-
-    # @app.route('/api/goals/by-completed/<string:completed>', methods=['GET'])
-    # @login_required
-    # def get_goals_by_completed(completed: str) -> Response:
-    #     """Route to retrieve all goals by completion status.
-
-    #     Path Parameter:
-    #         - completed (str): Either 'true' or 'false'.
-
-    #     Returns:
-    #         JSON response with a list of matching goals.
-
-    #     Raises:
-    #         400 error for invalid boolean input or missing data.
-    #         500 error for unexpected database issues.
-    #     """
-    #     try:
-    #         app.logger.info(f"Request to retrieve goals by completion status: {completed}")
-    #         status = completed.lower() == 'true'
-    #         goals = Goals.get_goals_by_completed(status)
-    #         return make_response(jsonify({
-    #             "status": "success",
-    #             "goals": [g.id for g in goals]
-    #         }), 200)
-    #     except ValueError as e:
-    #         app.logger.warning(f"Goal retrieval failed: {e}")
-    #         return make_response(jsonify({"status": "error", "message": str(e)}), 400)
-    #     except Exception as e:
-    #         app.logger.error(f"Internal error retrieving completed goals: {e}")
-    #         return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
-
-    # @app.route('/api/goals/by-value/<int:goal_value>', methods=['GET'])
-    # @login_required
-    # def get_goals_by_goal_value(goal_value: int) -> Response:
-    #     """Route to retrieve all goals by goal value.
-
-    #     Path Parameter:
-    #         - goal_value (int): The numeric goal value to filter by.
-
-    #     Returns:
-    #         JSON response with matching goals.
-
-    #     Raises:
-    #         400 error if no goals are found.
-    #         500 error if database issues occur.
-    #     """
-    #     try:
-    #         app.logger.info(f"Request to retrieve goals by goal value: {goal_value}")
-    #         goals = Goals.get_goals_by_goal_value(goal_value)
-    #         return make_response(jsonify({
-    #             "status": "success",
-    #             "goals": [g.id for g in goals]
-    #         }), 200)
-    #     except ValueError as e:
-    #         app.logger.warning(f"Goal retrieval failed: {e}")
-    #         return make_response(jsonify({"status": "error", "message": str(e)}), 400)
-    #     except Exception as e:
-    #         app.logger.error(f"Error retrieving goals by goal value: {e}")
-    #         return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
-
-    # @app.route('/api/update-goal/<int:goal_id>', methods=['PATCH']) 
-    # @login_required
-    # def update_goal(goal_id: int) -> Response:
-    #     """Route to update a goal by ID.
-
-    #     Path Parameter:
-    #         - goal_id (int): The ID of the goal to update.
-
-    #     Expected JSON Input:
-    #         - target (str): Updated target.
-    #         - goal_value (int): Updated goal value.
-    #         - goal_progress (float): Updated progress.
-    #         - completed (bool): Updated completion status.
-
-    #     Returns:
-    #         JSON response with the updated goal or error.
-
-    #     Raises:
-    #         400 error for invalid input or if goal not found.
-    #         500 error for database issues.
-    #     """
-    #     try:
-    #         data = request.get_json()
-    #         goal = Goals.get_goal_by_id(goal_id)
-
-    #         new_target = data.get("target")
-    #         new_goal_value = data.get("goal_value")
-    #         new_goal_progress = data.get("goal_progress")
-    #         new_completed = data.get("completed")
-
-    #         old_fields = [goal.target, goal.goal_value, goal.goal_progress, goal.completed]
-    #         new_fields = [new_target, new_goal_value, new_goal_progress, new_completed]
-    #         updated_fields = []
-
-    #         for i in range(len(old_fields)):
-    #             if old_fields[i] != new_fields[i]:
-    #                 updated_fields.append(new_fields[i])
-
-    #         updated_goal = Goals.update_goal(
-    #             goal_id,
-    #             target=new_target,
-    #             goal_value=new_goal_value,
-    #             goal_progress=new_goal_progress,
-    #             completed=new_completed
-    #         )
-    #         app.logger.info(f"Updated goal ID {goal_id} successfully.")
-    #         return make_response(jsonify({
-    #             "status": "success", 
-    #             "goal": updated_goal.id,
-    #             "updated_fields": updated_fields
-    #         }), 200)
-    #     except ValueError as e:
-    #         app.logger.warning(f"Update failed for goal {goal_id}: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error", 
-    #             "message": str(e)
-    #         }), 400)
-    #     except Exception as e:
-    #         app.logger.error(f"Internal error updating goal {goal_id}: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error",
-    #             "message": "Internal server error"
-    #         }), 500)
-
-    # @app.route('/api/delete-goal-by-target/<string:target>', methods=['DELETE'])
-    # @login_required
-    # def delete_goal_by_target(target: str) -> Response:
-    #     """Route to delete a goal by target.
-
-    #     Path Parameter:
-    #         - target (str): The goal's target field.
+    #         - target (str): The order's target field.
 
     #     Returns:
     #         JSON response on successful deletion.
 
     #     Raises:
-    #         400 error if goal is not found.
+    #         400 error if order is not found.
     #         500 error on DB issues.
     #     """
     #     try:
-    #         Goals.delete_goal_by_target(target)
-    #         app.logger.info(f"Deleted goal with target {target}.")
-    #         return make_response(jsonify({"status": "success", "message": f"Goal with target '{target}' deleted."}), 200)
+    #         orders.delete_order_by_target(target)
+    #         app.logger.info(f"Deleted order with target {target}.")
+    #         return make_response(jsonify({"status": "success", "message": f"order with target '{target}' deleted."}), 200)
     #     except ValueError as e:
-    #         app.logger.warning(f"Goal delete failed for target {target}: {e}")
+    #         app.logger.warning(f"order delete failed for target {target}: {e}")
     #         return make_response(jsonify({"status": "error", "message": str(e)}), 400)
     #     except Exception as e:
-    #         app.logger.error(f"Internal error deleting goal by target {target}: {e}")
+    #         app.logger.error(f"Internal error deleting order by target {target}: {e}")
     #         return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
 
 
-    # @app.route('/api/delete-goal-by-value/<int:goal_value>', methods=['DELETE'])
+    # @app.route('/api/delete-order-by-value/<int:order_value>', methods=['DELETE'])
     # @login_required
-    # def delete_goal_by_value(goal_value: int) -> Response:
-    #     """Route to delete a goal by goal value.
+    # def delete_order_by_value(order_value: int) -> Response:
+    #     """Route to delete a order by order value.
 
     #     Path Parameter:
-    #         - goal_value (int): The value set for the goal.
+    #         - order_value (int): The value set for the order.
 
     #     Returns:
     #         JSON response on successful deletion.
 
     #     Raises:
-    #         400 error if goal is not found.
+    #         400 error if order is not found.
     #         500 error on DB issues.
     #     """
     #     try:
-    #         Goals.delete_goal_by_goal_value(goal_value)
-    #         app.logger.info(f"Deleted goal with value {goal_value}.")
-    #         return make_response(jsonify({"status": "success", "message": f"Goal with value {goal_value} deleted."}), 200)
+    #         orders.delete_order_by_order_value(order_value)
+    #         app.logger.info(f"Deleted order with value {order_value}.")
+    #         return make_response(jsonify({"status": "success", "message": f"order with value {order_value} deleted."}), 200)
     #     except ValueError as e:
-    #         app.logger.warning(f"Goal delete failed for value {goal_value}: {e}")
+    #         app.logger.warning(f"order delete failed for value {order_value}: {e}")
     #         return make_response(jsonify({"status": "error", "message": str(e)}), 400)
     #     except Exception as e:
-    #         app.logger.error(f"Internal error deleting goal by value {goal_value}: {e}")
+    #         app.logger.error(f"Internal error deleting order by value {order_value}: {e}")
     #         return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
 
 
-    # @app.route('/api/delete-goal-by-completed/<completed>', methods=['DELETE'])
+    # @app.route('/api/delete-order-by-completed/<completed>', methods=['DELETE'])
     # @login_required
-    # def delete_goal_by_completed(completed: str) -> Response:
-    #     """Route to delete a goal by completed status.
+    # def delete_order_by_completed(completed: str) -> Response:
+    #     """Route to delete a order by completed status.
 
     #     Path Parameter:
     #         - completed (str): 'true' or 'false'.
@@ -732,40 +827,40 @@ def create_app(config_class=ProductionConfig) -> Flask:
     #         JSON response on successful deletion.
 
     #     Raises:
-    #         400 error if goal is not found.
+    #         400 error if order is not found.
     #         500 error on DB issues.
     #     """
     #     try:
     #         status = completed.lower() == 'true'
-    #         Goals.delete_goal_by_completed(status)
-    #         app.logger.info(f"Deleted goal with completed status {status}.")
-    #         return make_response(jsonify({"status": "success", "message": f"Goal with completed={status} deleted."}), 200)
+    #         orders.delete_order_by_completed(status)
+    #         app.logger.info(f"Deleted order with completed status {status}.")
+    #         return make_response(jsonify({"status": "success", "message": f"order with completed={status} deleted."}), 200)
     #     except ValueError as e:
     #         app.logger.warning(f"Delete by completed failed: {e}")
     #         return make_response(jsonify({"status": "error", "message": str(e)}), 400)
     #     except Exception as e:
-    #         app.logger.error(f"Error deleting goal by completed: {e}")
+    #         app.logger.error(f"Error deleting order by completed: {e}")
     #         return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
 
 
-    # @app.route('/api/goals/recommendations/<int:goal_id>', methods=['GET'])
+    # @app.route('/api/orders/recommendations/<int:order_id>', methods=['GET'])
     # @login_required
-    # def get_exercise_recommendations(goal_id: int) -> Response:
-    #     """Route to get exercise recommendations for a goal.
+    # def get_exercise_recommendations(order_id: int) -> Response:
+    #     """Route to get exercise recommendations for a order.
 
     #     Path Parameter:
-    #         - goal_id (int): The ID of the goal.
+    #         - order_id (int): The ID of the order.
 
     #     Returns:
     #         JSON list of recommended exercises.
 
     #     Raises:
-    #         400 if goal not found.
+    #         400 if order not found.
     #         500 on external API or DB failure.
     #     """
     #     try:
-    #         recommendations = Goals.get_exercise_recommendations(goal_id)
-    #         app.logger.info(f"Retrieved exercise recommendations for goal {goal_id}. {recommendations}")
+    #         recommendations = orders.get_exercise_recommendations(order_id)
+    #         app.logger.info(f"Retrieved exercise recommendations for order {order_id}. {recommendations}")
     #         return make_response(jsonify({
     #             "status": "success",
     #             "recommendations": recommendations
@@ -784,13 +879,13 @@ def create_app(config_class=ProductionConfig) -> Flask:
     #         }), 500)
 
 
-    # @app.route('/api/goals/log-session/<int:goal_id>', methods=['POST'])
+    # @app.route('/api/orders/log-session/<int:order_id>', methods=['POST'])
     # @login_required
-    # def log_workout(goal_id: int) -> Response:
-    #     """Route to log a workout session for a goal.
+    # def log_workout(order_id: int) -> Response:
+    #     """Route to log a workout session for a order.
 
     #     Path Parameter:
-    #         - goal_id (int): The ID of the goal.
+    #         - order_id (int): The ID of the order.
 
     #     Expected JSON Input:
     #         - amount (float): Progress amount.
@@ -808,27 +903,27 @@ def create_app(config_class=ProductionConfig) -> Flask:
     #     """
     #     try:
     #         data = request.get_json()
-    #         goal = Goals.get_goal_by_id(goal_id)
-    #         message = goal.log_workout_session(
+    #         order = orders.get_order_by_id(order_id)
+    #         message = order.log_workout_session(
     #             amount=data.get("amount"),
     #             exercise_type=data.get("exercise_type"),
     #             duration=data.get("duration"),
     #             intensity=data.get("intensity"),
     #             note=data.get("note", "")
     #         )
-    #         app.logger.info(f"Workout logged for goal {goal_id}: {message}")
+    #         app.logger.info(f"Workout logged for order {order_id}: {message}")
     #         return make_response(jsonify({
     #             "status": "success",
     #             "message": message
     #         }), 200)
     #     except ValueError as e:
-    #         app.logger.warning(f"Workout log failed for goal {goal_id}: {e}")
+    #         app.logger.warning(f"Workout log failed for order {order_id}: {e}")
     #         return make_response(jsonify({
     #             "status": "error",
     #             "message": str(e)
     #         }), 400)
     #     except Exception as e:
-    #         app.logger.error(f"Internal error logging workout for goal {goal_id}: {e}")
+    #         app.logger.error(f"Internal error logging workout for order {order_id}: {e}")
     #         return make_response(jsonify({
     #             "status": "error",
     #             "message": "Internal server error"
@@ -842,94 +937,94 @@ def create_app(config_class=ProductionConfig) -> Flask:
     # ############################################################
 
 
-    # @app.route('/api/add-goal-to-plan/<int:goal_id>', methods=['POST'])
+    # @app.route('/api/add-order-to-plan/<int:order_id>', methods=['POST'])
     # @login_required
-    # def add_goal_to_plan(goal_id: int) -> Response:
-    #     """Route to add a goal to the plan by goal_id.
+    # def add_order_to_plan(order_id: int) -> Response:
+    #     """Route to add a order to the plan by order_id.
 
     #     Path Parameter:
-    #         - goal_id (int): The ID of the goal.
+    #         - order_id (int): The ID of the order.
 
     #     Returns:
     #         JSON response indicating success of the addition.
 
     #     Raises:
-    #         400 error if required fields are missing or the goal does not exist.
-    #         500 error if there is an issue adding the goal to the plan.
+    #         400 error if required fields are missing or the order does not exist.
+    #         500 error if there is an issue adding the order to the plan.
 
     #     """
     #     try:
-    #         app.logger.info("Received request to add goal to plan")
+    #         app.logger.info("Received request to add order to plan")
 
-    #         app.logger.info(f"Looking up goal with id {goal_id}")
-    #         goal = Goals.get_goal_by_id(goal_id=goal_id)
+    #         app.logger.info(f"Looking up order with id {order_id}")
+    #         order = orders.get_order_by_id(order_id=order_id)
 
-    #         if not goal:
-    #             app.logger.warning(f"Goal not found")
+    #         if not order:
+    #             app.logger.warning(f"order not found")
     #             return make_response(jsonify({
     #                 "status": "error",
-    #                 "message": f"goal not found in catalog"
+    #                 "message": f"order not found in catalog"
     #             }), 400)
 
-    #         plan_model.add_goal_to_plan(goal_id)
-    #         app.logger.info(f"Successfully added goal to plan: {goal.target} - {goal.goal_progress} out of {goal.goal_value}")
+    #         plan_model.add_order_to_plan(order_id)
+    #         app.logger.info(f"Successfully added order to plan: {order.target} - {order.order_progress} out of {order.order_value}")
 
     #         return make_response(jsonify({
     #             "status": "success",
-    #             "message": f"goal {goal.target} - {goal.goal_progress} out of {goal.goal_value} added to plan"
+    #             "message": f"order {order.target} - {order.order_progress} out of {order.order_value} added to plan"
     #         }), 200)
 
     #     except Exception as e:
-    #         app.logger.error(f"Failed to add goal to plan: {e}")
+    #         app.logger.error(f"Failed to add order to plan: {e}")
     #         return make_response(jsonify({
     #             "status": "error",
-    #             "message": "An internal error occurred while adding the goal to the plan",
+    #             "message": "An internal error occurred while adding the order to the plan",
     #             "details": str(e)
     #         }), 500)
 
 
-    # @app.route('/api/remove-goal-from-plan/<int:goal_id>', methods=['DELETE'])
+    # @app.route('/api/remove-order-from-plan/<int:order_id>', methods=['DELETE'])
     # @login_required
-    # def remove_goal_by_goal_id(goal_id:int) -> Response:
-    #     """Route to remove a goal from the plan by goal_id.
+    # def remove_order_by_order_id(order_id:int) -> Response:
+    #     """Route to remove a order from the plan by order_id.
 
     #     Path Parameter:
-    #         - goal_id (int): The ID of the goal.
+    #         - order_id (int): The ID of the order.
 
     #     Returns:
     #         JSON response indicating success of the removal.
 
     #     Raises:
-    #         400 error if required fields are missing or the goal does not exist in the plan.
-    #         500 error if there is an issue removing the goal.
+    #         400 error if required fields are missing or the order does not exist in the plan.
+    #         500 error if there is an issue removing the order.
 
     #     """
     #     try:
-    #         app.logger.info("Received request to remove goal from plan")
+    #         app.logger.info("Received request to remove order from plan")
 
-    #         app.logger.info(f"Looking up goal to remove: id - {goal_id}")
-    #         goal = Goals.get_goal_by_id(goal_id)
+    #         app.logger.info(f"Looking up order to remove: id - {order_id}")
+    #         order = orders.get_order_by_id(order_id)
 
-    #         if not goal:
-    #             app.logger.warning(f"goal with id {goal_id} not found in catalog")
+    #         if not order:
+    #             app.logger.warning(f"order with id {order_id} not found in catalog")
     #             return make_response(jsonify({
     #                 "status": "error",
-    #                 "message": f"goal with id {goal_id} not found in catalog"
+    #                 "message": f"order with id {order_id} not found in catalog"
     #             }), 400)
 
-    #         plan_model.remove_goal_by_goal_id(goal.id)
-    #         app.logger.info(f"Successfully removed goal with id {goal_id} from plan")
+    #         plan_model.remove_order_by_order_id(order.id)
+    #         app.logger.info(f"Successfully removed order with id {order_id} from plan")
 
     #         return make_response(jsonify({
     #             "status": "success",
-    #             "message": f"Goal with id {goal_id} removed from plan"
+    #             "message": f"order with id {order_id} removed from plan"
     #         }), 200)
 
     #     except Exception as e:
-    #         app.logger.error(f"Failed to remove goal from plan: {e}")
+    #         app.logger.error(f"Failed to remove order from plan: {e}")
     #         return make_response(jsonify({
     #             "status": "error",
-    #             "message": "An internal error occurred while removing the goal from the plan",
+    #             "message": "An internal error occurred while removing the order from the plan",
     #             "details": str(e)
     #         }), 500)
 
@@ -937,7 +1032,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
     # @app.route('/api/clear-plan', methods=['POST'])
     # @login_required
     # def clear_plan() -> Response:
-    #     """Route to clear all goals from the plan.
+    #     """Route to clear all orders from the plan.
 
     #     Returns:
     #         JSON response indicating success of the operation.
@@ -973,32 +1068,32 @@ def create_app(config_class=ProductionConfig) -> Flask:
     # ############################################################
 
 
-    # @app.route('/api/get-all-goals-from-plan', methods=['GET'])
+    # @app.route('/api/get-all-orders-from-plan', methods=['GET'])
     # @login_required
-    # def get_all_goals_from_plan() -> Response:
-    #     """Retrieve all goals in the plan.
+    # def get_all_orders_from_plan() -> Response:
+    #     """Retrieve all orders in the plan.
 
     #     Returns:
-    #         JSON response containing the list of goals.
+    #         JSON response containing the list of orders.
 
     #     Raises:
     #         500 error if there is an issue retrieving the plan.
 
     #     """
     #     try:
-    #         app.logger.info("Received request to retrieve all goals from the plan.")
+    #         app.logger.info("Received request to retrieve all orders from the plan.")
 
-    #         goals = plan_model.get_all_goals()
-    #         goal_ids = [goal.id for goal in goals]
+    #         orders = plan_model.get_all_orders()
+    #         order_ids = [order.id for order in orders]
 
-    #         app.logger.info(f"Successfully retrieved {len(goals)} goals from the plan.")
+    #         app.logger.info(f"Successfully retrieved {len(orders)} orders from the plan.")
     #         return make_response(jsonify({
     #             "status": "success",
-    #             "goals": goal_ids
+    #             "orders": order_ids
     #         }), 200)
 
     #     except Exception as e:
-    #         app.logger.error(f"Failed to retrieve goals from plan: {e}")
+    #         app.logger.error(f"Failed to retrieve orders from plan: {e}")
     #         return make_response(jsonify({
     #             "status": "error",
     #             "message": "An internal error occurred while retrieving the plan",
@@ -1009,10 +1104,10 @@ def create_app(config_class=ProductionConfig) -> Flask:
     # @app.route('/api/get-plan-progress', methods=['GET'])
     # @login_required
     # def get_plan_progress() -> Response:
-    #     """Retrieve progress of goals in the plan.
+    #     """Retrieve progress of orders in the plan.
 
     #     Returns:
-    #         JSON response containing the percentage of goals completed.
+    #         JSON response containing the percentage of orders completed.
 
     #     Raises:
     #         500 error if there is an issue retrieving progress.
@@ -1023,14 +1118,14 @@ def create_app(config_class=ProductionConfig) -> Flask:
 
     #         percentage = plan_model.get_plan_progress()
 
-    #         app.logger.info(f"Successfully retrieved percentage of goals completed in the plan.")
+    #         app.logger.info(f"Successfully retrieved percentage of orders completed in the plan.")
     #         return make_response(jsonify({
     #             "status": "success",
     #             "percentage": percentage
     #         }), 200)
 
     #     except Exception as e:
-    #         app.logger.error(f"Failed to retrieve goals from plan: {e}")
+    #         app.logger.error(f"Failed to retrieve orders from plan: {e}")
     #         return make_response(jsonify({
     #             "status": "error",
     #             "message": "An internal error occurred while retrieving the plan",

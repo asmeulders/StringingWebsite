@@ -13,7 +13,7 @@ def order_wilson(session):
         customer="Alex",
         stringer="Alex",
         order_date=date(2025, 6, 10),  
-        racket="Wilson Pro Staff", 
+        racket="Wilson Pro Staff",
         mains_tension=52, 
         mains_string="Luxilon ALU Power",
         crosses_tension=52,
