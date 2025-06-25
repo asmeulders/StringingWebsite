@@ -773,86 +773,88 @@ def create_app(config_class=ProductionConfig) -> Flask:
                 "message": "Internal server error"
             }), 500)
 
-    # @app.route('/api/delete-order-by-target/<string:target>', methods=['DELETE'])
-    # @login_required
-    # def delete_order_by_target(target: str) -> Response:
-    #     """Route to delete a order by target.
+    @app.route('/api/delete-order-by-customer/<string:customer>', methods=['DELETE'])
+    @login_required
+    def delete_order_by_customer(customer: str) -> Response:
+        """Route to delete a order by customer.
 
-    #     Path Parameter:
-    #         - target (str): The order's target field.
+        Path Parameter:
+            - customer (str): The customer for the order.
 
-    #     Returns:
-    #         JSON response on successful deletion.
+        Returns:
+            JSON response on successful deletion.
 
-    #     Raises:
-    #         400 error if order is not found.
-    #         500 error on DB issues.
-    #     """
-    #     try:
-    #         orders.delete_order_by_target(target)
-    #         app.logger.info(f"Deleted order with target {target}.")
-    #         return make_response(jsonify({"status": "success", "message": f"order with target '{target}' deleted."}), 200)
-    #     except ValueError as e:
-    #         app.logger.warning(f"order delete failed for target {target}: {e}")
-    #         return make_response(jsonify({"status": "error", "message": str(e)}), 400)
-    #     except Exception as e:
-    #         app.logger.error(f"Internal error deleting order by target {target}: {e}")
-    #         return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
-
-
-    # @app.route('/api/delete-order-by-value/<int:order_value>', methods=['DELETE'])
-    # @login_required
-    # def delete_order_by_value(order_value: int) -> Response:
-    #     """Route to delete a order by order value.
-
-    #     Path Parameter:
-    #         - order_value (int): The value set for the order.
-
-    #     Returns:
-    #         JSON response on successful deletion.
-
-    #     Raises:
-    #         400 error if order is not found.
-    #         500 error on DB issues.
-    #     """
-    #     try:
-    #         orders.delete_order_by_order_value(order_value)
-    #         app.logger.info(f"Deleted order with value {order_value}.")
-    #         return make_response(jsonify({"status": "success", "message": f"order with value {order_value} deleted."}), 200)
-    #     except ValueError as e:
-    #         app.logger.warning(f"order delete failed for value {order_value}: {e}")
-    #         return make_response(jsonify({"status": "error", "message": str(e)}), 400)
-    #     except Exception as e:
-    #         app.logger.error(f"Internal error deleting order by value {order_value}: {e}")
-    #         return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
+        Raises:
+            400 error if order is not found.
+            500 error on DB issues.
+        """
+        try:
+            Orders.delete_order_by_customer(customer)
+            app.logger.info(f"Deleted order with customer {customer}.")
+            return make_response(jsonify({"status": "success", "message": f"Order with customer '{customer}' deleted."}), 200)
+        except ValueError as e:
+            app.logger.warning(f"Order delete failed for customer {customer}: {e}")
+            return make_response(jsonify({"status": "error", "message": str(e)}), 400)
+        except Exception as e:
+            app.logger.error(f"Internal error deleting order by customer {customer}: {e}")
+            return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
 
 
-    # @app.route('/api/delete-order-by-completed/<completed>', methods=['DELETE'])
-    # @login_required
-    # def delete_order_by_completed(completed: str) -> Response:
-    #     """Route to delete a order by completed status.
+    @app.route('/api/delete-order-by-date/<string:order_date_string>', methods=['DELETE'])
+    @login_required
+    def delete_order_by_date(order_date_string: str) -> Response:
+        """Route to delete a order by date.
 
-    #     Path Parameter:
-    #         - completed (str): 'true' or 'false'.
+        Path Parameter:
+            - order_date_string (str): The string representing the date of the order.
 
-    #     Returns:
-    #         JSON response on successful deletion.
+        Returns:
+            JSON response on successful deletion.
 
-    #     Raises:
-    #         400 error if order is not found.
-    #         500 error on DB issues.
-    #     """
-    #     try:
-    #         status = completed.lower() == 'true'
-    #         orders.delete_order_by_completed(status)
-    #         app.logger.info(f"Deleted order with completed status {status}.")
-    #         return make_response(jsonify({"status": "success", "message": f"order with completed={status} deleted."}), 200)
-    #     except ValueError as e:
-    #         app.logger.warning(f"Delete by completed failed: {e}")
-    #         return make_response(jsonify({"status": "error", "message": str(e)}), 400)
-    #     except Exception as e:
-    #         app.logger.error(f"Error deleting order by completed: {e}")
-    #         return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
+        Raises:
+            400 error if order is not found.
+            500 error on DB issues.
+        """
+        try:
+            app.logger.info(f"Request to retrieve orders by order date: {order_date_string}")
+            order_date = datetime.datetime.strptime(order_date_string, "%Y%m%d").date()
+            Orders.delete_order_by_order_date(order_date)
+            app.logger.info(f"Deleted order with date {order_date}.")
+            return make_response(jsonify({"status": "success", "message": f"Order with date {order_date_string} deleted."}), 200)
+        except ValueError as e:
+            app.logger.warning(f"Order delete failed for date {order_date}: {e}")
+            return make_response(jsonify({"status": "error", "message": str(e)}), 400)
+        except Exception as e:
+            app.logger.error(f"Internal error deleting order by date {order_date}: {e}")
+            return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
+
+
+    @app.route('/api/delete-order-by-completed/<completed>', methods=['DELETE'])
+    @login_required
+    def delete_order_by_completed(completed: str) -> Response:
+        """Route to delete a order by completed status.
+
+        Path Parameter:
+            - completed (str): 'true' or 'false'.
+
+        Returns:
+            JSON response on successful deletion.
+
+        Raises:
+            400 error if order is not found.
+            500 error on DB issues.
+        """
+        try:
+            status = completed.lower() == 'true'
+            Orders.delete_order_by_completed(status)
+            app.logger.info(f"Deleted order with completed status {status}.")
+            return make_response(jsonify({"status": "success", "message": f"Order with completed={status} deleted."}), 200)
+        except ValueError as e:
+            app.logger.warning(f"Delete by completed failed: {e}")
+            return make_response(jsonify({"status": "error", "message": str(e)}), 400)
+        except Exception as e:
+            app.logger.error(f"Error deleting order by completed: {e}")
+            return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
 
 
     # @app.route('/api/orders/recommendations/<int:order_id>', methods=['GET'])

@@ -206,14 +206,36 @@ def run_smoketest():
     delete_head_resp = session.delete(f"{base_url}/delete-order/{head_id}")
     assert delete_head_resp.status_code == 200
     assert delete_head_resp.json()["status"] == "success"
-    print("order deletion successful")
+    print("Order deletion successful - order_id")
 
 
     fake_id = 3
     delete_fake_resp = session.delete(f"{base_url}/delete-order/{fake_id}")
     assert delete_fake_resp.status_code == 500
     assert delete_fake_resp.json()["status"] == "error"
-    print("order deletion failed as expected")
+    print("Order deletion failed as expected")
+
+    delete_by_customer_resp = session.delete(f"{base_url}/delete-order-by-customer/{wilson_customer}")
+    assert delete_by_customer_resp.status_code == 200
+    assert delete_by_customer_resp.json()["status"] == 'success'
+    assert delete_by_customer_resp.json()['message'] == f"Order with customer '{wilson_customer}' deleted."
+    print('Order deletion successful - customer')
+
+    session.post(f"{base_url}/create-order", json=order_wilson)
+    session.post(f"{base_url}/create-order", json=order_head)
+    print("Created Wilson and Head orders again.")
+
+    delete_by_date_resp = session.delete(f"{base_url}/delete-order-by-date/{wilson_date}")
+    assert delete_by_date_resp.status_code == 200
+    assert delete_by_date_resp.json()["status"] == 'success'
+    assert delete_by_date_resp.json()['message'] == f"Order with date {wilson_date} deleted."
+    print('Order deletion successful - date')
+
+    delete_by_completed_resp = session.delete(f"{base_url}/delete-order-by-completed/{order_head['completed']}")
+    assert delete_by_completed_resp.status_code == 200
+    assert delete_by_completed_resp.json()["status"] == 'success'
+    assert delete_by_completed_resp.json()['message'] == f"Order with completed={order_head['completed']} deleted."
+    print('Order deletion successful - completed')
 
 #     # Log out
     logout_resp = session.post(f"{base_url}/logout")

@@ -1009,7 +1009,7 @@ class Orders(db.Model):
             logger.info(f"Successfully deleted order with customer {customer}")
 
         except SQLAlchemyError as e:
-            logger.error(f"Database error while deleting order with target {customer}: {e}")
+            logger.error(f"Database error while deleting order with customer {customer}: {e}")
             db.session.rollback()
             raise
 
