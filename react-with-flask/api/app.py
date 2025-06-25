@@ -9,7 +9,7 @@ from RacketTracker.models.order_model import Orders
 from RacketTracker.models.user_model import Users
 from RacketTracker.utils.logger import configure_logger
 from datetime import date
-import datetime
+import datetime, time
 from werkzeug.routing import BaseConverter
 from pydantic import ValidationError
 import logging
@@ -19,23 +19,23 @@ configure_logger(logger)
 
 load_dotenv()
 
-def json_serial(obj):
-    """JSON serializer for objects not serializable by default json code"""
+# def json_serial(obj):
+#     """JSON serializer for objects not serializable by default json code"""
 
-    if isinstance(obj, date):
-        return obj.strftime('%Y%m%d')
-    raise TypeError ("Type %s not serializable" % type(obj))
+#     if isinstance(obj, date):
+#         return obj.strftime('%Y%m%d')
+#     raise TypeError ("Type %s not serializable" % type(obj))
 
-class DateConverter(BaseConverter):
-    """Extracts a ISO8601 date from the path and validates it."""
-    def to_python(self, value):
-        try:
-            return datetime.datetime.strptime(value, '%Y%m%d').date()
-        except ValueError as e:
-            raise e
+# class DateConverter(BaseConverter):
+#     """Extracts a ISO8601 date from the path and validates it."""
+#     def to_python(self, value):
+#         try:
+#             return datetime.datetime.strptime(value, '%Y%m%d').date()
+#         except ValueError as e:
+#             raise e
 
-    def to_url(self, value):
-        return value.strftime('%Y%m%d')
+#     def to_url(self, value):
+#         return value.strftime('%Y%m%d')
     
 def create_app(config_class=ProductionConfig) -> Flask:
     """Create a Flask application with the specified configuration.
@@ -48,15 +48,21 @@ def create_app(config_class=ProductionConfig) -> Flask:
 
     """
     app = Flask(__name__)
+
+    # Front end test
+    @app.route('/api/time')
+    def get_current_time():
+        return {'time': time.time()}
+
     configure_logger(app.logger)
 
-    app.config.from_object(config_class)
-    app.url_map.converters['date'] = DateConverter
+    # app.config.from_object(config_class)
+    # app.url_map.converters['date'] = DateConverter
 
     # Initialize database
-    db.init_app(app)
-    with app.app_context():
-        db.create_all()
+    # db.init_app(app)
+    # with app.app_context():
+    #     db.create_all()
 
     # Initialize login manager
     login_manager = LoginManager()
