@@ -12,17 +12,27 @@ from datetime import date
 import datetime
 from werkzeug.routing import BaseConverter
 from pydantic import ValidationError
+import logging
 
+logger = logging.getLogger(__name__)
+configure_logger(logger)
 
 load_dotenv()
+
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, date):
+        return obj.strftime('%Y%m%d')
+    raise TypeError ("Type %s not serializable" % type(obj))
 
 class DateConverter(BaseConverter):
     """Extracts a ISO8601 date from the path and validates it."""
     def to_python(self, value):
         try:
-            return datetime.strptime(value, '%Y%m%d').date()
-        except ValueError:
-            raise ValidationError()
+            return datetime.datetime.strptime(value, '%Y%m%d').date()
+        except ValueError as e:
+            raise e
 
     def to_url(self, value):
         return value.strftime('%Y%m%d')
@@ -347,8 +357,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
                 }), 400)
 
             customer = data["customer"]
-            stringer = data["stringer"]
-            order_date = data["order_date"]
+            order_date = datetime.datetime.strptime(data["order_date"], "%Y%m%d").date()
             racket = data["racket"]
             mains_tension = data["mains_tension"]
             mains_string = data["mains_string"]
@@ -364,15 +373,6 @@ def create_app(config_class=ProductionConfig) -> Flask:
                 return make_response(jsonify({
                     "status": "error",
                     "message": "Invalid input types: customer should be a string"
-                }), 400)
-            
-            if (
-                not isinstance(stringer, str)
-            ):
-                app.logger.warning("Invalid input data types - stringer")
-                return make_response(jsonify({
-                    "status": "error",
-                    "message": "Invalid input types: stringer should be a string"
                 }), 400)
             
             if (
@@ -412,7 +412,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
                 }), 400)
             
             if (
-                not isinstance(crosses_tension, int)
+                crosses_tension and not isinstance(crosses_tension, int)
             ):
                 app.logger.warning("Invalid input data types - crosses_tension")
                 return make_response(jsonify({
@@ -421,7 +421,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
                 }), 400)
             
             if (
-                not isinstance(crosses_string, str)
+                crosses_string and not isinstance(crosses_string, str)
             ):
                 app.logger.warning("Invalid input data types - crosses_string")
                 return make_response(jsonify({
@@ -430,7 +430,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
                 }), 400)
             
             if (
-                not isinstance(replacement_grip, str)
+                replacement_grip and not isinstance(replacement_grip, str)
             ):
                 app.logger.warning("Invalid input data types - replacement_grip")
                 return make_response(jsonify({
@@ -450,7 +450,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             paid_status = "paid" if paid else "unpaid"
 
             app.logger.info(f"Adding order: {customer} - {racket}: {order_date} - {paid_status}")
-            Orders.create_order(customer=customer, stringer=stringer, order_date=order_date, racket=racket, mains_tension=mains_tension, mains_string=mains_string, crosses_tension=crosses_tension, crosses_string=crosses_string, replacement_grip=replacement_grip, paid=paid)
+            Orders.create_order(customer=customer, order_date=order_date, racket=racket, mains_tension=mains_tension, mains_string=mains_string, crosses_tension=crosses_tension, crosses_string=crosses_string, replacement_grip=replacement_grip, paid=paid)
 
             app.logger.info(f"Order added successfully: {customer} - {racket}: {order_date} - {paid_status}")
             return make_response(jsonify({
@@ -579,7 +579,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             return make_response(jsonify({
                 "status": "success",
                 "message": "Order retrieved successfully",
-                "Customer": order.customer
+                "customer": order.customer
             }), 200)
 
         except Exception as e:
@@ -616,7 +616,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             app.logger.warning(f"Order retrieval failed: {e}")
             return make_response(jsonify({
                 "status": "error",
-                  "message": str(e)
+                "message": str(e)
             }), 400)
         except Exception as e:
             app.logger.error(f"Internal error retrieving orders by customer: {e}")
@@ -655,9 +655,9 @@ def create_app(config_class=ProductionConfig) -> Flask:
             app.logger.error(f"Internal error retrieving completed orders: {e}")
             return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
 
-    @app.route('/api/orders/by-date/<date:order_date>', methods=['GET'])
+    @app.route('/api/orders/by-date/<string:order_date_string>', methods=['GET'])
     @login_required
-    def get_orders_by_order_date(order_date: date) -> Response: # should i make this a datetime object instead?
+    def get_orders_by_order_date(order_date_string: str) -> Response: # should i make this a datetime object instead?
         """Route to retrieve all orders by order date.
 
         Path Parameter:
@@ -671,7 +671,8 @@ def create_app(config_class=ProductionConfig) -> Flask:
             500 error if database issues occur.
         """
         try:
-            app.logger.info(f"Request to retrieve orders by order date: {order_date.strftime("%m/%d/%Y")}")
+            app.logger.info(f"Request to retrieve orders by order date: {order_date_string}")
+            order_date = datetime.datetime.strptime(order_date_string, "%Y%m%d").date()
             orders = Orders.get_orders_by_order_date(order_date)
             return make_response(jsonify({
                 "status": "success",
@@ -694,7 +695,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
 
         Expected JSON Input:
             - customer (str): The updated customer.
-            - order_date (date): The updated date.
+            - order_date (str): The updated date represented by a string.
             - racket (str): The updated name of the racket.
             - mains_tension (int): Updated value of the mains tension.
             - crosses_tension (int): Updated value of the crosses tension.
@@ -714,7 +715,9 @@ def create_app(config_class=ProductionConfig) -> Flask:
             order = Orders.get_order_by_id(order_id)
 
             new_customer = data.get("customer")
-            new_order_date = data.get("order_date")
+            
+            new_order_date = data.get('order_date')
+            logger.info(new_order_date)
             new_racket = data.get("racket")
             new_mains_tension = data.get("mains_tension")
             new_mains_string = data.get("mains_string")
@@ -723,26 +726,35 @@ def create_app(config_class=ProductionConfig) -> Flask:
             new_replacement_grip = data.get("replacement_grip")
 
 
-            old_fields = [order.customer, order.order_date, order.racket, order.mains_tension, order.mains_string, order.crosses_tension, order.crosses_string, order.replacement_grip]
+            old_fields = [order.customer, order.order_date.strftime('%Y%m%d'), order.racket, order.mains_tension, order.mains_string, order.crosses_tension, order.crosses_string, order.replacement_grip]
+            logger.info(old_fields[1])
             new_fields = [new_customer, new_order_date, new_racket, new_mains_tension, new_mains_string, new_crosses_tension, new_crosses_string, new_replacement_grip]
             updated_fields = []
+            fields = []
 
             for i in range(len(old_fields)):
                 if old_fields[i] != new_fields[i]:
+                    logger.info(new_fields[i])
                     updated_fields.append(new_fields[i])
+                    fields.append(new_fields[i])
+                else:
+                    fields.append(None)
+
+            logger.info(datetime.datetime.strptime(fields[1], '%Y%m%d').date(), type(datetime.datetime.strptime(fields[1], '%Y%m%d').date()))
 
             updated_order = Orders.update_order(
                 order_id,
-                customer=new_customer,
-                order_date=new_order_date,
-                racket=new_racket,
-                mains_tension=new_mains_tension,
-                mains_string=new_mains_string,
-                crosses_tension=new_crosses_tension,
-                crosses_string=new_crosses_string,
-                replacement_grip=new_replacement_grip,
+                customer=fields[0],
+                order_date=datetime.datetime.strptime(fields[1], '%Y%m%d').date(),
+                racket=fields[2],
+                mains_tension=fields[3],
+                mains_string=fields[4],
+                crosses_tension=fields[5],
+                crosses_string=fields[6],
+                replacement_grip=fields[7],
             )
-            app.logger.info(f"Updated order ID {order_id} successfully.")
+            app.logger.info(f"Updated order {order_id} successfully.")
+
             return make_response(jsonify({
                 "status": "success", 
                 "order": updated_order.order_id,

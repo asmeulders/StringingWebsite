@@ -1,5 +1,6 @@
 import requests
 from datetime import date
+import datetime
 
 
 def run_smoketest():
@@ -12,7 +13,7 @@ def run_smoketest():
         "order_id": 1,
         "customer": "Alex",
         "stringer": "Alex",
-        "order_date": date(2025, 6, 10),
+        "order_date": "20250610",
         "racket": "Wilson Pro Staff",
         "mains_tension": 52,
         "mains_string": "Luxilon ALU Power",
@@ -27,20 +28,20 @@ def run_smoketest():
         "order_id": 2,
         "customer": "Rocky",
         "stringer": "Alex",
-        "order_date": date(2025, 6, 18),
+        "order_date": "20250618",
         "racket": "Head Speed MP",
         "mains_tension": 54,
         "mains_string": "Head Velocity",
         "crosses_tension": 50,
         "crosses_string": "Head Synthetic Gut",
         "replacement_grip": "Head White Tacky",
-        "paid": True,
-        "completed": True
+        "paid": False,
+        "completed": False
     }
 
     updated_wilson = {
         "customer": "Alex",
-        "order_date": date(2025, 6, 10),
+        "order_date": "20250611",
         "racket": "Wilson Pro Staff",
         "mains_tension": 52,
         "mains_string": "Luxilon ALU Power",
@@ -166,21 +167,22 @@ def run_smoketest():
 #     assert clear_plan_resp.json()["status"] == "success"
 #     print("plan cleared successfully")
 
-    get_order_by_customer_resp = session.get(f"{base_url}/orders/by-customer/{order_wilson["customer"]}")
+    wilson_customer = "Alex"
+    get_order_by_customer_resp = session.get(f"{base_url}/orders/by-customer/{wilson_customer}")
     assert get_order_by_customer_resp.status_code == 200
     assert get_order_by_customer_resp.json()["orders"] == [wilson_id]
     assert get_order_by_customer_resp.json()["status"] == "success"
     print("Order retrieved successfully - customer")
 
-
-    get_order_by_completed_resp = session.get(f"{base_url}/orders/by-completed/{order_head["completed"]}")
+    wilson_completed = False
+    get_order_by_completed_resp = session.get(f"{base_url}/orders/by-completed/{wilson_completed}")
     assert get_order_by_completed_resp.status_code == 200
-    assert get_order_by_completed_resp.json()["orders"] == [head_id]
+    assert get_order_by_completed_resp.json()["orders"] == [wilson_id, head_id]
     assert get_order_by_completed_resp.json()["status"] == "success"
     print("Order retrieved successfully - completed")
 
-
-    get_order_by_date_resp = session.get(f"{base_url}/orders/by-date/{order_wilson["order_date"]}")
+    wilson_date = "20250610"
+    get_order_by_date_resp = session.get(f"{base_url}/orders/by-date/{wilson_date}")
     assert get_order_by_date_resp.status_code == 200
     assert get_order_by_date_resp.json()["orders"] == [wilson_id]
     assert get_order_by_date_resp.json()["status"] == "success"
@@ -190,13 +192,13 @@ def run_smoketest():
     update_order_resp = session.patch(f"{base_url}/update-order/{wilson_id}", json=updated_wilson)
     assert update_order_resp.status_code == 200
     assert update_order_resp.json()["status"] == "success"
-    assert update_order_resp.json()["updated_fields"] == [updated_wilson["crosses_tension"], updated_wilson["crosses_string"]]
+    assert update_order_resp.json()["updated_fields"] == [updated_wilson["order_date"], updated_wilson["crosses_tension"], updated_wilson["crosses_string"]]
     print("Order updated successfully")
 
     
     get_all_orders_resp = session.get(f"{base_url}/get-all-orders-from-history")
     assert get_all_orders_resp.status_code == 200
-    assert [get_all_orders_resp.json()["orders"][0]["id"],get_all_orders_resp.json()["orders"][1]["order_id"]] == [wilson_id, head_id]
+    assert [get_all_orders_resp.json()["orders"][0]["order_id"], get_all_orders_resp.json()["orders"][1]["order_id"]] == [wilson_id, head_id]
     assert get_all_orders_resp.json()["status"] == "success"
     print("Orders retrieved successfully")
 
