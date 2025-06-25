@@ -49,26 +49,26 @@ def create_app(config_class=ProductionConfig) -> Flask:
     """
     app = Flask(__name__)
 
-    # Front end test
-    @app.route('/api/time')
-    def get_current_time():
-        return {'time': time.time()}
-
     configure_logger(app.logger)
 
-    # app.config.from_object(config_class)
+    app.config.from_object(config_class)
     # app.url_map.converters['date'] = DateConverter
 
     # Initialize database
-    # db.init_app(app)
-    # with app.app_context():
-    #     db.create_all()
+    db.init_app(app)
+    with app.app_context():
+        db.create_all()
 
     # Initialize login manager
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = 'login'
 
+    # Front end test
+    @app.route('/api/time')
+    def get_current_time():
+        return {'time': time.time()}
+    
     @login_manager.user_loader
     def load_user(user_id):
         return Users.query.filter_by(username=user_id).first()
@@ -147,7 +147,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
                 "details": str(e)
             }), 500)
 
-    @app.route('/api/login', methods=['POST']) #
+    @app.route('/api/login', methods=['POST'])
     def login() -> Response:
         """Authenticate a user and log them in.
 

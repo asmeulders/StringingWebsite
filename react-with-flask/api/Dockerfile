@@ -26,4 +26,4 @@ VOLUME ["/app/react-with-flask/api/db"]
 EXPOSE 5000
 
 # Run the entrypoint script when the container launches
-CMD ["python", "/react-with-flask/api/app.py"]
+CMD ["python3", "app.py"]

@@ -13,6 +13,7 @@ class ProductionConfig():
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', "sqlite:////app/react-with-flask/api/db/app.db")  # Production database URI from environment
+    print(SQLALCHEMY_DATABASE_URI)
 
 class TestConfig():
     """Testing configuration."""
