@@ -132,7 +132,7 @@ def test_create_order_invalid_data(customer, order_date, racket, mains_tension, 
 # --- Get order ---
 
 def test_get_order_by_id(order_wilson: Orders):
-    """Test fetching a order by ID."""
+    """Test fetching an order by ID."""
     fetched = Orders.get_order_by_id(order_wilson.order_id)
     assert fetched.customer ==  "Alex"
     assert fetched.order_date == date(2025, 6, 10)
@@ -143,7 +143,7 @@ def test_get_order_by_id_not_found(app, session):
         Orders.get_order_by_id(999)
 
 def test_get_orders_by_customer(order_wilson: Orders):
-    """Test target field value of a order."""
+    """Test target field value of an order."""
     fetched = Orders.get_orders_by_customer(order_wilson.customer)
     assert fetched[0].racket == "Wilson Pro Staff"
 
@@ -153,7 +153,7 @@ def test_get_orders_by_customer_not_found(app, session):
         Orders.get_orders_by_customer("nonexistent_customer")
 
 def test_get_orders_by_order_date(order_wilson: Orders):
-    """Test order_date field of a order."""
+    """Test order_date field of an order."""
     fetched = Orders.get_orders_by_order_date(order_wilson.order_date)
     assert fetched[0].order_date == order_wilson.order_date
 
@@ -163,7 +163,7 @@ def test_get_order_by_order_date_not_found(app, session):
         Orders.get_orders_by_order_date(date(1111, 1, 1))
 
 def test_get_orders_by_completed(order_wilson: Orders):
-    """Test completed field of a order."""
+    """Test completed field of an order."""
     fetched = Orders.get_orders_by_completed(order_wilson.completed)
     assert fetched[0].completed == order_wilson.completed
 
@@ -250,7 +250,7 @@ def test_assign_stringer_invalid_stringer(session, order_head: Orders):
 # --- Delete order ---
 
 def test_delete_order_by_id(session, order_wilson: Orders):
-    """Test deleting a order by ID."""
+    """Test deleting an order by ID."""
     Orders.delete_order(order_wilson.order_id)
     assert session.get(Orders, order_wilson.order_id) is None
 
@@ -260,22 +260,37 @@ def test_delete_order_not_found(app, session):
         Orders.delete_order(999)
 
 def test_delete_order_by_customer(session, order_wilson: Orders): # should these really be assert is None? i guess so... should i also make a test where they do find one?
-    """Test deleting a order by target."""
+    """Test deleting an order by target."""
     Orders.delete_order_by_customer(order_wilson.customer)
     deleted = session.query(Orders).filter_by(customer=order_wilson.customer).first()
     assert deleted is None
 
+def test_delete_order_by_customer_not_found(app, session):
+    """Test deleting a non-existent order by ID."""
+    with pytest.raises(ValueError, match="not found"):
+        Orders.delete_order_by_customer("")
+
 def test_delete_order_by_order_date(session, order_wilson: Orders):
-    """Test deleting a order by order_value."""
+    """Test deleting an order by order_value."""
     Orders.delete_order_by_order_date(order_wilson.order_date)
     deleted = session.query(Orders).filter_by(order_date=order_wilson.order_date).first()
     assert deleted is None
 
+def test_delete_order_by_order_date_not_found(app, session):
+    """Test deleting a non-existent order by ID."""
+    with pytest.raises(ValueError, match="not found"):
+        Orders.delete_order_by_order_date(date(1111, 11, 1))
+
 def test_delete_order_by_completed(session, order_wilson: Orders):
-    """Test deleting a order by completed status."""
+    """Test deleting an order by completed status."""
     Orders.delete_order_by_completed(order_wilson.completed)
     deleted = session.query(Orders).filter_by(completed=order_wilson.completed).first()
     assert deleted is None
+
+def test_delete_order_by_completed_not_found(app, session):
+    """Test deleting a non-existent order by ID."""
+    with pytest.raises(ValueError, match="not found"):
+        Orders.delete_order_by_completed(True)
 
 
 
