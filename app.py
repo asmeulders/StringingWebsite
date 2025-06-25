@@ -856,7 +856,127 @@ def create_app(config_class=ProductionConfig) -> Flask:
             app.logger.error(f"Error deleting order by completed: {e}")
             return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
 
+    
+    @app.route('/api/orders/mark-completed/<int:order_id>', methods=['PATCH'])
+    @login_required
+    def mark_order_completed(order_id: int):
+        """Route to mark an order as completed by the id.
 
+        Path Parameter:
+            - order_id (int): The ID of the order to complete.
+
+        Returns:
+            JSON response on successful completion.
+
+        Raises:
+            400 error for invalid input or if order not found.
+            500 error for database issues.
+        """
+        try:
+            completed_order = Orders.mark_completed(order_id)
+            app.logger.info(f"Completed order {order_id} successfully.")
+
+            return make_response(jsonify({
+                "status": "success", 
+                "order": completed_order.order_id
+            }), 200)
+        
+        except ValueError as e:
+            app.logger.warning(f"Completion failed for order {order_id}: {e}")
+            return make_response(jsonify({
+                "status": "error", 
+                "message": str(e)
+            }), 400)
+        except Exception as e:
+            app.logger.error(f"Internal error updating order {order_id}: {e}")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "Internal server error"
+            }), 500)
+        
+
+    @app.route('/api/orders/mark-paid/<int:order_id>', methods=['PATCH'])
+    @login_required
+    def mark_order_paid(order_id: int):
+        """Route to mark an order as paid by the id.
+
+        Path Parameter:
+            - order_id (int): The ID of the order to mark paid.
+
+        Returns:
+            JSON response on successful completion.
+
+        Raises:
+            400 error for invalid input or if order not found.
+            500 error for database issues.
+        """
+        try:
+            paid_order = Orders.mark_paid(order_id)
+            app.logger.info(f"Paid for order {order_id} successfully.")
+
+            return make_response(jsonify({
+                "status": "success", 
+                "order": paid_order.order_id
+            }), 200)
+        
+        except ValueError as e:
+            app.logger.warning(f"Payment failed for order {order_id}: {e}")
+            return make_response(jsonify({
+                "status": "error", 
+                "message": str(e)
+            }), 400)
+        except Exception as e:
+            app.logger.error(f"Internal error paying for order {order_id}: {e}")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "Internal server error"
+            }), 500)
+        
+
+    @app.route('/api/orders/assign-stringer/<int:order_id>', methods=['PATCH'])
+    @login_required
+    def assign_stringer(order_id: int):
+        """Route to assign a stringer to the order with the id given.
+
+        Path Parameter:
+            - order_id (int): The ID of the order to assign the stringer to.
+
+        Expected JSON Input:
+            - stringer (str): The assigned stringers.
+
+        Returns:
+            JSON response on successful completion.
+
+        Raises:
+            400 error for invalid input or if order not found.
+            500 error for database issues.
+        """
+        try:
+            data = request.get_json()
+
+            stringer = data['stringer']
+
+            assigned_order = Orders.assign_stringer(order_id, stringer)
+            app.logger.info(f"Assigned {stringer} to order {order_id} successfully.")
+
+            return make_response(jsonify({
+                "status": "success", 
+                "order": assigned_order.order_id
+            }), 200)
+        
+        except ValueError as e:
+            app.logger.warning(f"Assignment failed for order {order_id}: {e}")
+            return make_response(jsonify({
+                "status": "error", 
+                "message": str(e)
+            }), 400)
+        except Exception as e:
+            app.logger.error(f"Internal error assigning {stringer} to order {order_id}: {e}")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "Internal server error"
+            }), 500)
+        
     # @app.route('/api/orders/recommendations/<int:order_id>', methods=['GET'])
     # @login_required
     # def get_exercise_recommendations(order_id: int) -> Response:

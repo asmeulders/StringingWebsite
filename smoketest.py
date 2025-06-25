@@ -195,6 +195,21 @@ def run_smoketest():
     assert update_order_resp.json()["updated_fields"] == [updated_wilson["order_date"], updated_wilson["crosses_tension"], updated_wilson["crosses_string"]]
     print("Order updated successfully")
 
+    mark_completed_resp = session.patch(f"{base_url}/orders/mark-completed/{wilson_id}")
+    assert mark_completed_resp.status_code == 200
+    assert mark_completed_resp.json()["status"] == "success"
+    print("Order completed successfully")
+
+    mark_paid_resp = session.patch(f"{base_url}/orders/mark-paid/{wilson_id}")
+    assert mark_paid_resp.status_code == 200
+    assert mark_paid_resp.json()["status"] == "success"
+    print("Order paid for successfully")
+
+    stringer_json = {'stringer': "Alex"}
+    assign_stringer_resp = session.patch(f"{base_url}/orders/assign-stringer/{wilson_id}", json=stringer_json)
+    assert assign_stringer_resp.status_code == 200
+    assert assign_stringer_resp.json()["status"] == "success"
+    print("Stringer assigned successfully")
     
     get_all_orders_resp = session.get(f"{base_url}/get-all-orders-from-history")
     assert get_all_orders_resp.status_code == 200
