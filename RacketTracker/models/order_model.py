@@ -47,7 +47,7 @@ configure_logger(logger)
 #         # If a field is provided, check that it's a non-empty customer
 #         # Checks only if field is provided (because it is nullable) and if provided, must be a non-empty customer
 #         # if self.recurring is not None and (not isinstance(self.recurring, str) or not self.recurring.strip()):
-#         #     raise ValueError("Recurring goal must be a non-empty customer if provided.")
+#         #     raise ValueError("Recurring order must be a non-empty customer if provided.")
         
 #         if not self.name or not isinstance(self.name, str):
 #             raise ValueError("name must be a non-empty string")
@@ -67,7 +67,7 @@ configure_logger(logger)
 #             ValueError: If any field is invalid. 
 #             SQLAlchemyError: For any other database-related issues.
 #         """
-#         logger.info(f"Received request to create goal.")
+#         logger.info(f"Received request to create order.")
 
 #         try:
 #             customer = Customers(
@@ -86,12 +86,12 @@ configure_logger(logger)
 #             logger.info(f"Customer successfully created: {name}")
 
 #         except SQLAlchemyError as e:
-#             logger.error(f"Database error while creating goal: {e}")
+#             logger.error(f"Database error while creating order: {e}")
 #             db.session.rollback()
 #             raise 
 
 # ##############################################
-# # Delete Goals
+# # Delete orders
 # ##############################################
 
 #     @classmethod
@@ -124,7 +124,7 @@ configure_logger(logger)
 #             raise
 
 # # ###############################################
-# # # Get Goals 
+# # # Get orders 
 # # ###############################################
 
 #     @classmethod
@@ -142,7 +142,7 @@ configure_logger(logger)
 #             ValueError: If no customer with the given ID is found.
 #             SQLAlchemyError: If a database error occurs.
 #         """
-#         logger.info(f"Attempting to retrieve goal with ID {customer_id}")
+#         logger.info(f"Attempting to retrieve order with ID {customer_id}")
 
 #         try:
 #             customer = cls.query.get(customer_id)
@@ -195,7 +195,7 @@ configure_logger(logger)
 #             raise
 
 # ##########################################
-# # Update Goals
+# # Update orders
 # ##########################################
 #     @classmethod
 #     def update_customer(
@@ -282,7 +282,7 @@ configure_logger(logger)
 #         # If a field is provided, check that it's a non-empty string
 #         # Checks only if field is provided (because it is nullable) and if provided, must be a non-empty string
 #         # if self.recurring is not None and (not isinstance(self.recurring, str) or not self.recurring.strip()):
-#         #     raise ValueError("Recurring goal must be a non-empty string if provided.")
+#         #     raise ValueError("Recurring order must be a non-empty string if provided.")
         
 #         if not self.brand or not isinstance(self.brand, str):
 #             raise ValueError("brand must be a non-empty string")
@@ -326,7 +326,7 @@ configure_logger(logger)
 #             ValueError: If any field is invalid. 
 #             SQLAlchemyError: For any other database-related issues.
 #         """
-#         logger.info(f"Received request to create goal.")
+#         logger.info(f"Received request to create order.")
 
 #         try:
 #             racket = Rackets(
@@ -353,12 +353,12 @@ configure_logger(logger)
 #             logger.info(f"Racket successfully created: {brand} {model} - {head_size}")
 
 #         except SQLAlchemyError as e:
-#             logger.error(f"Database error while creating goal: {e}")
+#             logger.error(f"Database error while creating order: {e}")
 #             db.session.rollback()
 #             raise 
 
 # ##############################################
-# # Delete Goals
+# # Delete orders
 # ##############################################
 
 #     @classmethod
@@ -391,7 +391,7 @@ configure_logger(logger)
 #             raise
 
 # # ###############################################
-# # # Get Goals 
+# # # Get orders 
 # # ###############################################
 
 #     @classmethod
@@ -409,7 +409,7 @@ configure_logger(logger)
 #             ValueError: If no racket with the given ID is found.
 #             SQLAlchemyError: If a database error occurs.
 #         """
-#         logger.info(f"Attempting to retrieve goal with ID {racket_id}")
+#         logger.info(f"Attempting to retrieve order with ID {racket_id}")
 
 #         try:
 #             racket = cls.query.get(racket_id)
@@ -470,7 +470,7 @@ configure_logger(logger)
 #             raise
 
 # ##########################################
-# # Update Goals
+# # Update orders
 # ##########################################
 #     @classmethod
 #     def update_racket(
@@ -606,7 +606,7 @@ configure_logger(logger)
 #         # If a field is provided, check that it's a non-empty string
 #         # Checks only if field is provided (because it is nullable) and if provided, must be a non-empty string
 #         # if self.recurring is not None and (not isinstance(self.recurring, str) or not self.recurring.strip()):
-#         #     raise ValueError("Recurring goal must be a non-empty string if provided.")
+#         #     raise ValueError("Recurring order must be a non-empty string if provided.")
         
 #         if not self.brand or not isinstance(self.brand, str):
 #             raise ValueError("brand must be a non-empty string")
@@ -635,7 +635,7 @@ configure_logger(logger)
 #             ValueError: If any field is invalid. 
 #             SQLAlchemyError: For any other database-related issues.
 #         """
-#         logger.info(f"Received request to create goal.")
+#         logger.info(f"Received request to create order.")
 
 #         try:
 #             string = Strings(
@@ -657,12 +657,12 @@ configure_logger(logger)
 #             logger.info(f"string successfully created: {brand} {model} - {type}")
 
 #         except SQLAlchemyError as e:
-#             logger.error(f"Database error while creating goal: {e}")
+#             logger.error(f"Database error while creating order: {e}")
 #             db.session.rollback()
 #             raise 
 
 # ##############################################
-# # Delete Goals
+# # Delete orders
 # ##############################################
 
 #     @classmethod
@@ -695,7 +695,7 @@ configure_logger(logger)
 #             raise
 
 # # ###############################################
-# # # Get Goals 
+# # # Get orders 
 # # ###############################################
 
 #     @classmethod
@@ -713,7 +713,7 @@ configure_logger(logger)
 #             ValueError: If no string with the given ID is found.
 #             SQLAlchemyError: If a database error occurs.
 #         """
-#         logger.info(f"Attempting to retrieve goal with ID {string_id}")
+#         logger.info(f"Attempting to retrieve order with ID {string_id}")
 
 #         try:
 #             string = cls.query.get(string_id)
@@ -769,7 +769,7 @@ configure_logger(logger)
 #             raise
 
 # ##########################################
-# # Update Goals
+# # Update orders
 # ##########################################
 #     @classmethod
 #     def update_string(
@@ -852,18 +852,21 @@ class Orders(db.Model):
     """
 
     __tablename__ = "orders"
-    
-    order_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    # also add grips parameter and an additional notes parameter
+    order_id = db.Column(db.Integer, primary_key=True, autoincrement=True) # add price parameter
     customer = db.Column(db.Text, nullable=False)
+    stringer = db.Column(db.Text, nullable=True)
     order_date = db.Column(db.Date, nullable=False)
     racket = db.Column(db.Text, nullable=False)
     mains_tension = db.Column(db.Integer, nullable=False)
-    crosses_tension = db.Column(db.Integer, nullable=True)
     mains_string = db.Column(db.Text, nullable=False)
+    crosses_tension = db.Column(db.Integer, nullable=True)
     crosses_string = db.Column(db.Text, nullable=True)
+    replacement_grip = db.Column(db.Text, nullable = True)
     paid = db.Column(db.Boolean, default=False)
     completed = db.Column(db.Boolean, default=False)
-
+    
     def validate(self) -> None:
         """Validates the order instance before committing to the database.
 
@@ -874,29 +877,31 @@ class Orders(db.Model):
         # If a field is provided, check that it's a non-empty string
         # Checks only if field is provided (because it is nullable) and if provided, must be a non-empty string
         # if self.recurring is not None and (not isinstance(self.recurring, str) or not self.recurring.strip()):
-        #     raise ValueError("Recurring goal must be a non-empty string if provided.")
+        #     raise ValueError("Recurring order must be a non-empty string if provided.")
         
         if not self.customer or not isinstance(self.customer, str):
             raise ValueError("customer must be a non-empty string.")
         if not self.order_date or not isinstance(self.order_date, date):
-            raise ValueError("date must be a Date object.")
+            raise ValueError("date must be a date object.")
         if not self.racket or not isinstance(self.racket, str):
             raise ValueError("racket must be a non-empty string.")
         if not self.mains_tension or not isinstance(self.mains_tension, int):
             raise ValueError("mains_tension must be a valid integer.")
-        if not isinstance(self.crosses_tension, int):
-            raise ValueError("crosses_tension must be a valid integer.")
         if not self.mains_string or not isinstance(self.mains_string, str):
             raise ValueError("mains_string must be a non-empty string.")
-        if not isinstance(self.crosses_string, str):
-            raise ValueError("crosses_string must be a non-empty string.")
+        if self.crosses_tension and not isinstance(self.crosses_tension, int):
+            raise ValueError("mains_tension must be a valid integer.")
+        if self.crosses_string and not isinstance(self.crosses_string, str):
+            raise ValueError("crosses_string must be a string.")
+        if self.replacement_grip and not isinstance(self.replacement_grip, str):
+            raise ValueError("replacement_grip must be a string.")
         if self.paid is None or not isinstance(self.paid, bool):
             raise ValueError("paid must be either true or false.")
-        if self.completed is None or not isinstance(self.completed, bool):
-            raise ValueError("completed must be either true or false.")
 
     @classmethod
-    def create_order(cls, customer: str, order_date: date, racket: str, mains_tension: int, crosses_tension: int, mains_string: str, crosses_string: str, paid: bool = False, completed: bool = False) -> None:
+    def create_order(cls, customer: str, order_date: date, racket: str, mains_tension: int, mains_string: str,
+                    crosses_tension: int = None, crosses_string: str = None, replacement_grip: str = None, 
+                    paid: bool = False) -> None:
         """
         Creates a new order in the orders table using SQLAlchemy.
 
@@ -908,14 +913,14 @@ class Orders(db.Model):
             crosses_tension (int, optional): Tension of the crosses.
             mains_string (int): Name of the string used on the mains.
             crosses_string (int, optional): Name of the string used on the crosses.
-            paid (bool, optional): Paid status of the order.
-            completed (bool, optional): Completion status of the racket stringing.
+            replacement_grip(str, optional): Name of the replacement grip desired.
+            paid (bool, optional): Boolean for paid status of the order.
 
         Raises:
             ValueError: If any field is invalid. 
             SQLAlchemyError: For any other database-related issues.
         """
-        logger.info(f"Received request to create goal.")
+        logger.info(f"Received request to create order.")
 
         try:
             order = Orders(
@@ -923,11 +928,12 @@ class Orders(db.Model):
                 order_date=order_date,
                 racket=racket,
                 mains_tension=mains_tension,
-                crosses_tension=crosses_tension,
                 mains_string=mains_string,
+                crosses_tension=crosses_tension,
                 crosses_string=crosses_string,
+                replacement_grip=replacement_grip,
                 paid=paid,
-                completed=completed
+                completed=False
             )
             order.validate()
         except ValueError as e:
@@ -938,15 +944,15 @@ class Orders(db.Model):
             db.session.add(order)
             db.session.commit()
             paid_message = "Paid" if paid else "Unpaid"
-            logger.info(f"Order successfully placed: {mains_tension}. {paid_message}")
+            logger.info(f"Order created. {order_date.strftime('%m%d%y')} - {customer}: {racket} - {paid_message}")
 
         except SQLAlchemyError as e:
-            logger.error(f"Database error while creating goal: {e}")
+            logger.error(f"Database error while creating order: {e}")
             db.session.rollback()
             raise 
 
 ##############################################
-# Delete Goals
+# Delete orders
 ##############################################
 
     @classmethod
@@ -978,159 +984,96 @@ class Orders(db.Model):
             db.session.rollback()
             raise
 
-#     @classmethod
-#     def delete_goal_by_target(cls, target: str) -> None:
-#         """
-#         Permanently deletes a goal by target.
+    @classmethod
+    def delete_order_by_customer(cls, customer: str) -> None:
+        """
+        Permanently deletes an order by customer.
 
-#         Args:
-#             target (str): A target muscle group the user wants to work on.
+        Args:
+            customer (str): The name of the customer.
 
-#         Raises:
-#             ValueError: If the goal with the given target does not exist.
-#             SQLAlchemyError: For any database-related issues.
-#         """
-#         logger.info(f"Received request to delete goal with ID {target}")
+        Raises:
+            ValueError: If the order with the given customer does not exist.
+            SQLAlchemyError: For any database-related issues.
+        """
+        logger.info(f"Received request to delete order with customer {customer}")
 
-#         try:
-#             goal = cls.query.filter_by(target=target).first() 
-#             if not goal:
-#                 logger.warning(f"Attempted to delete non-existent goal with target {target}")
-#                 raise ValueError(f"Goal with target {target} not found")
+        try:
+            order = cls.query.filter_by(customer=customer).first() 
+            if not order:
+                logger.warning(f"Attempted to delete non-existent order with customer {customer}")
+                raise ValueError(f"Order with target {customer} not found")
 
-#             db.session.delete(goal)
-#             db.session.commit()
-#             logger.info(f"Successfully deleted goal with target {target}")
+            db.session.delete(order)
+            db.session.commit()
+            logger.info(f"Successfully deleted order with customer {customer}")
 
-#         except SQLAlchemyError as e:
-#             logger.error(f"Database error while deleting goal with target {target}: {e}")
-#             db.session.rollback()
-#             raise
+        except SQLAlchemyError as e:
+            logger.error(f"Database error while deleting order with target {customer}: {e}")
+            db.session.rollback()
+            raise
 
-#     @classmethod
-#     def delete_goal_by_goal_value(cls, goal_value: int) -> None:
-#         """
-#         Permanently deletes a goal by the goal value.
+    @classmethod
+    def delete_order_by_order_date(cls, order_date: date) -> None:
+        """
+        Permanently deletes an order by the order date.
 
-#         Args:
-#             goal_value (int): A value the user wants to reach for a specific goal.
+        Args:
+            order_date (int): The date of a given order.
 
-#         Raises:
-#             ValueError: If the goal with the given goal value does not exist.
-#             SQLAlchemyError: For any database-related issues.
-#         """
-#         logger.info(f"Received request to delete goal with goal value {goal_value}")
+        Raises:
+            ValueError: If the order with the given order value does not exist.
+            SQLAlchemyError: For any database-related issues.
+        """
+        logger.info(f"Received request to delete order with date {order_date.strftime('%m/%d/%Y')}")
 
-#         try:
-#             goal = cls.query.filter_by(goal_value=goal_value).first()
-#             if not goal:
-#                 logger.warning(f"Attempted to delete non-existent goal with goal value {goal_value}")
-#                 raise ValueError(f"Goal with goal value {goal_value} not found")
+        try:
+            order = cls.query.filter_by(order_date=order_date).first()
+            if not order:
+                logger.warning(f"Attempted to delete non-existent order with date {order_date.strftime('%m/%d/%Y')}")
+                raise ValueError(f"Order with order value {order_date.strftime('%m/%d/%Y')} not found")
 
-#             db.session.delete(goal)
-#             db.session.commit()
-#             logger.info(f"Successfully deleted goal with goal value {goal_value}")
+            db.session.delete(order)
+            db.session.commit()
+            logger.info(f"Successfully deleted order with date {order_date.strftime('%m/%d/%Y')}")
 
-#         except SQLAlchemyError as e:
-#             logger.error(f"Database error while deleting goal with goal value {goal_value}: {e}")
-#             db.session.rollback()
-#             raise
+        except SQLAlchemyError as e:
+            logger.error(f"Database error while deleting order with date {order_date.strftime('%m/%d/%Y')}: {e}")
+            db.session.rollback()
+            raise
     
-#     @classmethod
-#     def delete_goal_by_completed(cls, completed: bool) -> None:
-#         """
-#         Permanently deletes a goal by the completion status.
+    @classmethod
+    def delete_order_by_completed(cls, completed: bool) -> None:
+        """
+        Permanently deletes a order by the completion status.
 
-#         Args:
-#             completed (bool): The completion status of that goal 
+        Args:
+            completed (bool): The completion status of that order. 
 
-#         Raises:
-#             ValueError: If the goal with the given completion status does not exist.
-#             SQLAlchemyError: For any database-related issues.
-#         """
-#         logger.info(f"Received request to delete goal with completion status {completed}")
+        Raises:
+            ValueError: If the order with the given completion status does not exist.
+            SQLAlchemyError: For any database-related issues.
+        """
+        logger.info(f"Received request to delete order with completion status {completed}")
 
-#         try:
-#             goal = cls.query.filter_by(completed=completed).first()
-#             if not goal:
-#                 logger.warning(f"Attempted to delete non-existent goal with completion {completed}")
-#                 raise ValueError(f"Goal with completion {completed} not found")
+        try:
+            order = cls.query.filter_by(completed=completed).first()
+            if not order:
+                logger.warning(f"Attempted to delete non-existent order with completion {completed}")
+                raise ValueError(f"Order with completion {completed} not found")
 
-#             db.session.delete(goal)
-#             db.session.commit()
-#             logger.info(f"Successfully deleted goal with completion {completed}")
+            db.session.delete(order)
+            db.session.commit()
+            logger.info(f"Successfully deleted order with completion {completed}")
 
-#         except SQLAlchemyError as e:
-#             logger.error(f"Database error while deleting goal with completion {completed}: {e}")
-#             db.session.rollback()
-#             raise
-    
-# ###############################################
-# # Progress Notes 
-# ###############################################
-#     def log_workout_session(self, amount: Union[float, int], exercise_type: str, duration: int, intensity: str, note: str = "") -> str:
-#         """
-#         Logs a workout session with progress and updates status.
-
-#         Args:
-#             amount (float, int): The amount to add to goal progress.
-#             exercise_type (str): The type of exercise performed (e.g., "Running").
-#             duration (int): The duration of the workout in minutes.
-#             intensity (str): The intensity of the workout (e.g., "Low", "Moderate", "High").
-#             note (str): An optional personal note about the session.
-
-#         Raises:
-#             ValueError: If the amount is not positive.
-#             SQLAlchemyError: For any database-related issues.
-
-#         Returns:
-#             str: A message indicating progress update or completion.
-#         """
-#         logger.info("Logging workout session...")
-#         if amount <= 0:
-#             raise ValueError("Progress amount must be positive.")
-
-#         if self.goal_progress is None:
-#             self.goal_progress = 0.0
-
-#         self.goal_progress += amount
-
-#         workout_note = f"{exercise_type} - {duration} min - {intensity}"
-#         if note:
-#             workout_note += f" | Note: {note}"
-
-#         logger.info(workout_note)
-
-#         percent = ((float)(self.goal_progress) / self.goal_value) * 100
-
-#         if self.goal_progress >= self.goal_value:
-#             self.completed = True
-#             message = f"Goal completed! Total progress: {percent:.1f}%"
-#         else:
-#             message = f"Workout logged. Progress: {percent:.1f}% complete."
-
-#         db.session.commit()
-#         return message
-
-#     # Helper methods
-#     def get_progress_notes(self) -> list[str]:
-#         """Returns progress notes as a list of strings."""
-#         logger.info("Getting previous progress notes...")
-#         try:
-#             return json.loads(self.progress_notes or "[]")
-#         except (TypeError, json.JSONDecodeError):
-#             return []
-
-#     def add_progress_note(self, note: str) -> None:
-#         """Appends a note to the progress_notes list."""
-#         notes = self.get_progress_notes()
-#         logger.info("Adding new progress notes...")
-#         notes.append(note)
-#         self.progress_notes = json.dumps(notes)
+        except SQLAlchemyError as e:
+            logger.error(f"Database error while deleting order with completion {completed}: {e}")
+            db.session.rollback()
+            raise
 
 
 # ###############################################
-# # Get Goals 
+# # Get orders 
 # ###############################################
 
     @classmethod
@@ -1148,7 +1091,7 @@ class Orders(db.Model):
             ValueError: If no order with the given ID is found.
             SQLAlchemyError: If a database error occurs.
         """
-        logger.info(f"Attempting to retrieve goal with ID {order_id}")
+        logger.info(f"Attempting to retrieve order with ID {order_id}")
 
         try:
             order = db.session.get(cls, order_id)
@@ -1164,129 +1107,98 @@ class Orders(db.Model):
             logger.error(f"Database error while retrieving order by ID {order_id}: {e}")
             raise
 
-#     @classmethod
-#     def get_goals_by_target(cls, target: str) -> list["Goals"]:
-#         """
-#         Retrieves all goals matching a specific target field.
+    @classmethod
+    def get_orders_by_customer(cls, customer: str) -> list["Orders"]:
+        """
+        Retrieves all orders for a given customer.
 
-#         Args:
-#             target (str): The target to search for.
+        Args:
+            customer (str): The customer whose orders we retrieve.
 
-#         Returns:
-#             list[Goals]: A list of goal instances matching the target.
+        Returns:
+            list[Orders]: A list of order instances matching the target.
 
-#         Raises:
-#             ValueError: If no goals with the given target are found.
-#             SQLAlchemyError: If a database error occurs.
-#         """
-#         logger.info(f"Attempting to retrieve all goals with target '{target}'")
+        Raises:
+            ValueError: If no order with the given target are found.
+            SQLAlchemyError: If a database error occurs.
+        """
+        logger.info(f"Attempting to retrieve all orders for customer '{customer}'")
 
-#         try:
-#             goals = cls.query.filter_by(target=target).all()
+        try:
+            orders: list = cls.query.filter_by(customer=customer).all()
 
-#             if not goals:
-#                 logger.info(f"No goals found with target '{target}'")
-#                 raise ValueError(f"No goals found with target '{target}'")
+            if not orders:
+                logger.info(f"No orders found for customer '{customer}'")
+                raise ValueError(f"No orders found for customer '{customer}'")
 
-#             logger.info(f"Successfully retrieved {len(goals)} goal(s) with target '{target}'")
-#             return goals
+            logger.info(f"Successfully retrieved {len(orders)} order(s) for customer '{customer}'")
+            return orders
 
-#         except SQLAlchemyError as e:
-#             logger.error(f"Database error while retrieving goals by target '{target}': {e}")
-#             raise
+        except SQLAlchemyError as e:
+            logger.error(f"Database error while retrieving orders for customer '{customer}': {e}")
+            raise
 
-#     @classmethod
-#     def get_goals_by_goal_value(cls, goal_value: int) -> list["Goals"]:
-#         """
-#         Retrieves all goals matching a specific goal value.
+    @classmethod
+    def get_orders_by_order_date(cls, order_date: date) -> list["Orders"]:
+        """
+        Retrieves all orders matching a specific order date.
 
-#         Args:
-#             goal_value (int): The goal value to search for.
+        Args:
+            order_date (date): The date to search for.
 
-#         Returns:
-#             list[Goals]: A list of goal instances matching the goal value.
+        Returns:
+            list[Orders]: A list of order instances matching the date.
 
-#         Raises:
-#             ValueError: If no goals with the given goal value are found.
-#             SQLAlchemyError: If a database error occurs.
-#         """
-#         logger.info(f"Attempting to retrieve all goals with goal value '{goal_value}'")
+        Raises:
+            ValueError: If no orders with the given date are found.
+            SQLAlchemyError: If a database error occurs.
+        """
+        logger.info(f"Attempting to retrieve all orders with date '{order_date.strftime('%m/%d/%Y')}'")
 
-#         try:
-#             goals = cls.query.filter_by(goal_value=goal_value).all()
+        try:
+            orders = cls.query.filter_by(order_date=order_date).all()
 
-#             if not goals:
-#                 logger.info(f"No goals found with goal value '{goal_value}'")
-#                 raise ValueError(f"No goals found with goal value '{goal_value}'")
+            if not orders:
+                logger.info(f"No orders found with date '{order_date.strftime('%m/%d/%Y')}'")
+                raise ValueError(f"No orders found with date '{order_date.strftime('%m/%d/%Y')}'")
 
-#             logger.info(f"Successfully retrieved {len(goals)} goal(s) with goal value '{goal_value}'")
-#             return goals
+            logger.info(f"Successfully retrieved {len(orders)} order(s) with order value '{order_date.strftime('%m/%d/%Y')}'")
+            return orders
 
-#         except SQLAlchemyError as e:
-#             logger.error(f"Database error while retrieving goals by goal value '{goal_value}': {e}")
-#             raise
+        except SQLAlchemyError as e:
+            logger.error(f"Database error while retrieving orders by date '{order_date.strftime('%m/%d/%Y')}': {e}")
+            raise
 
-#     @classmethod
-#     def get_goals_by_completed(cls, completed: bool) -> list["Goals"]:
-#         """
-#         Retrieves all goals matching completion status.
+    @classmethod
+    def get_orders_by_completed(cls, completed: bool) -> list["Orders"]:
+        """
+        Retrieves all orders matching completion status.
 
-#         Args:
-#             completed (bool): The completion status to search for.
+        Args:
+            completed (bool): The completion status to search for.
 
-#         Returns:
-#             list[Goals]: A list of goal instances matching the completion status.
+        Returns:
+            list[orders]: A list of order instances matching the completion status.
 
-#         Raises:
-#             ValueError: If no goals with the given completion status are found.
-#             SQLAlchemyError: If a database error occurs.
-#         """
-#         logger.info(f"Attempting to retrieve all goals with completion status '{completed}'")
+        Raises:
+            ValueError: If no orders with the given completion status are found.
+            SQLAlchemyError: If a database error occurs.
+        """
+        logger.info(f"Attempting to retrieve all orders with completion status '{completed}'")
 
-#         try:
-#             goals = cls.query.filter_by(completed=completed).all()
+        try:
+            orders = cls.query.filter_by(completed=completed).all()
 
-#             if not goals:
-#                 logger.info(f"No goals found with completion status '{completed}'")
-#                 raise ValueError(f"No goals found with completion status '{completed}'")
+            if not orders:
+                logger.info(f"No orders found with completion status '{completed}'")
+                raise ValueError(f"No orders found with completion status '{completed}'")
 
-#             logger.info(f"Successfully retrieved {len(goals)} goal(s) with completion status '{completed}'")
-#             return goals
+            logger.info(f"Successfully retrieved {len(orders)} order(s) with completion status '{completed}'")
+            return orders
 
-#         except SQLAlchemyError as e:
-#             logger.error(f"Database error while retrieving goals by completion status '{completed}': {e}")
-#             raise
-
-# # Recommendations
-#     @classmethod
-#     def get_exercise_recommendations(cls, goal_id: int) -> list[dict]:
-#         """
-#         Gets exercise recommendations from ExerciseDB based on a goal's target.
-
-#         Args:
-#             goal_id (int): The ID of the goal.
-
-#         Returns:
-#             list[dict]: A list of recommended exercises.
-
-#         Raises:
-#             ValueError: If the goal is not found.
-#             RuntimeError: If the external API call fails.
-#         """
-#         logger.info(f"Fetching exercise recommendations for goal ID {goal_id}")
-
-#         goal = cls.query.get(goal_id)
-#         if not goal:
-#             logger.warning(f"Goal with ID {goal_id} not found.")
-#             raise ValueError(f"Goal with ID {goal_id} not found.")
-
-#         try:
-#             exercises = fetch_recommendation(goal.target)
-#             logger.info(f"Successfully found {len(exercises)} exercise(s) for goal with ID {goal_id}")
-#             return exercises
-#         except RuntimeError as e:
-#             logger.error(f"Failed to fetch exercise recommendations: {e}")
-#             raise
+        except SQLAlchemyError as e:
+            logger.error(f"Database error while retrieving orders by completion status '{completed}': {e}")
+            raise
 
     @classmethod
     def get_all_orders(cls) -> list[dict]:
@@ -1312,12 +1224,14 @@ class Orders(db.Model):
                 {
                     "order_id": order.order_id,
                     "customer": order.customer,
+                    "stringer": order.stringer,
                     "order_date": order.order_date,
                     "racket": order.racket,
                     "mains_tension": order.mains_tension,
-                    "crosses_tension": order.crosses_tension,
                     "mains_string": order.mains_string,
+                    "crosses_tension": order.crosses_tension,
                     "crosses_string": order.crosses_string,
+                    "replacement_grip": order.replacement_grip,
                     "paid": order.paid,
                     "completed": order.completed
                 }
@@ -1332,8 +1246,9 @@ class Orders(db.Model):
             raise
 
 ##########################################
-# Update Goals
+# Update orders
 ##########################################
+
     @classmethod
     def update_order(
         cls,
@@ -1342,26 +1257,24 @@ class Orders(db.Model):
         order_date: date = None,
         racket: int = None,
         mains_tension: int = None,
-        crosses_tension: int = None,
         mains_string: int = None,
+        crosses_tension: int = None,
         crosses_string: int = None,
-        paid: bool = None,
-        completed: bool = None
+        replacement_grip: str = None
     ) -> "Orders":
         """
         Updates a order in the database by its ID.
 
         Args:
-            goal_id (int): The ID of the order to update.
+            order_id (int): The ID of the order to update.
             customer (int, optional): The new customer value.
             order_date (Date, optional): The new date.
             racket (int, optional): The new racket value.
             mains_tension (int, optional): The new mains_tension value.
-            crosses_tension (int, optional): The new crosses_tension value.
             mains_string (str, optional): The new mains_string value.
+            crosses_tension (int, optional): The new crosses_tension value.
             crosses_string (int, optional): The new crosses_string value.
-            paid (bool, optional): The new paid status.
-            completed (bool, optional): The new completion status.
+            replacement_grip (str, optional): The new replacement_grip value.
 
         Returns:
             Orders: The updated order instance.
@@ -1400,30 +1313,25 @@ class Orders(db.Model):
                     raise ValueError("mains_tension must be an integer.")
                 order.mains_tension = mains_tension
 
-            if crosses_tension is not None:
-                if not isinstance(crosses_tension, int):
-                    raise ValueError("crosses_tension must be an int.")
-                order.crosses_tension = crosses_tension
-
             if mains_string is not None:
                 if not isinstance(mains_string, str):
                     raise ValueError("mains_string must be an string.")
                 order.mains_string = mains_string
 
+            if crosses_tension is not None:
+                if not isinstance(crosses_tension, int):
+                    raise ValueError("crosses_tension must be an int.")
+                order.crosses_tension = crosses_tension            
+
             if crosses_string is not None:
                 if not isinstance(crosses_string, str):
                     raise ValueError("crosses_string must be a string.")
                 order.crosses_string = crosses_string
-            
-            if paid is not None:
-                if not isinstance(paid, bool):
-                    raise ValueError("paid must be a boolean")
-                order.paid = paid
 
-            if completed is not None:
-                if not isinstance(completed, bool):
-                    raise ValueError("completed must be a boolean.")
-                order.completed = completed
+            if replacement_grip is not None:
+                if not isinstance(replacement_grip, str):
+                    raise ValueError("replacement_grip must be an string.")
+                order.replacement_grip = replacement_grip
 
             db.session.commit()
             logger.info(f"Successfully updated order with ID {order_id}")
@@ -1434,35 +1342,122 @@ class Orders(db.Model):
             db.session.rollback()
             raise
 
-    # def log_progress(self, amount: Union[float, int]) -> str:
-    #     """
-    #     Logs workout progress toward a goal, updates completion status, and calculates percentage progress.
+    @classmethod
+    def mark_completed(cls, order_id: int) -> "Orders":
+        """
+        Marks an order as completed.
 
-    #     Args:
-    #         amount (float): The amount of progress to add.
+        Args:
+            order_id (int): The ID of the order to mark completed.
 
-    #     Returns:
-    #         str: A message indicating the current progress percentage or goal completion.
+        Returns:
+            order: The updated order instance.
 
-    #     Raises:
-    #         ValueError: If the amount is invalid or negative.
-    #     """
-    #     if amount <= 0:
-    #         raise ValueError("Progress amount must be positive.")
+        Raises:
+            ValueError: If the order with the given ID does not exist or inputs are invalid.
+            SQLAlchemyError: If a database error occurs.
+        """
+        logger.info(f"Attempting to mark order {order_id} as completed")
 
-    #     if self.goal_progress is None:
-    #         self.goal_progress = 0.0
+        try:
+            order: Orders = db.session.get(cls, order_id)
 
-    #     self.goal_progress += amount
+            if not order:
+                logger.warning(f"Order with ID {order_id} not found.")
+                raise ValueError(f"Order with ID {order_id} not found.")
+            
+            if order.completed:
+                logger.warning(f"Order {order_id} already completed.")
+                return order
+            
+            order.completed = True
 
-    #     progress_percent = ((float)(self.goal_progress) / self.goal_value) * 100
+            db.session.commit()
+            logger.info(f"Successfully marked order {order_id} complete.")
+            return order
 
-    #     if self.goal_progress >= self.goal_value:
-    #         self.completed = True
-    #         message = f"Goal completed! Progress: {progress_percent:.1f}%"
-    #     else:
-    #         #self.completed = False
-    #         message = f"Progress updated: {progress_percent:.1f}% complete."
+        except SQLAlchemyError as e:
+            logger.error(f"Database error while marking order {order_id} complete: {e}")
+            db.session.rollback()
+            raise
 
-    #     db.session.commit() 
-    #     return message
+    @classmethod
+    def mark_paid(cls, order_id: int) -> "Orders":
+        """
+        Marks an order as paid.
+
+        Args:
+            order_id (int): The ID of the order to update.
+
+        Returns:
+            order: The updated order instance.
+
+        Raises:
+            ValueError: If the order with the given ID does not exist or inputs are invalid.
+            SQLAlchemyError: If a database error occurs.
+        """
+        logger.info(f"Attempting to mark order {order_id} as paid")
+
+        try:
+            order: Orders = db.session.get(cls, order_id)
+
+            if not order:
+                logger.warning(f"Order with ID {order_id} not found.")
+                raise ValueError(f"Order with ID {order_id} not found.")
+            
+            if order.paid:
+                logger.warning(f"Order {order_id} already paid for.")
+                return order
+            
+            order.paid = True
+
+            db.session.commit()
+            logger.info(f"Successfully marked order {order_id} paid.")
+            return order
+
+        except SQLAlchemyError as e:
+            logger.error(f"Database error while marking order {order_id} paid: {e}")
+            db.session.rollback()
+            raise 
+
+    @classmethod
+    def assign_stringer(cls, order_id: int, stringer: str) -> "Orders":
+        """
+        Assigns a stringer to the order.
+
+        Args:
+            order_id (int): The ID of the order to update.
+            stringer(str): Name of the stringer.
+
+        Returns:
+            order: The updated order instance.
+
+        Raises:
+            ValueError: If the order with the given ID does not exist or inputs are invalid.
+            SQLAlchemyError: If a database error occurs.
+        """
+        logger.info(f"Attempting to assign {stringer} to order {order_id}.")
+
+        try:
+            order: Orders = db.session.get(cls, order_id)
+
+            if not order:
+                logger.warning(f"Order with ID {order_id} not found.")
+                raise ValueError(f"Order with ID {order_id} not found.")
+            
+            if stringer is None or not isinstance(stringer, str):
+                raise ValueError(f"stringer must be a non-empty string")
+            
+            if order.stringer:
+                logger.warning(f"{order.stringer} already assigned to this order. Reassigning to {stringer}...")
+
+            order.stringer = stringer
+
+            db.session.commit()
+            logger.info(f"Successfully assigned {stringer} to order {order_id}.")
+            return order
+
+        except SQLAlchemyError as e:
+            logger.error(f"Database error while assigning {stringer} to  order {order_id}: {e}")
+            db.session.rollback()
+            raise
