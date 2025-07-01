@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from flask import Flask, jsonify, make_response, Response, request
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_cors import CORS
 
 from config import ProductionConfig
 
@@ -48,6 +49,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
 
     """
     app = Flask(__name__)
+    
 
     configure_logger(app.logger)
 
@@ -68,6 +70,18 @@ def create_app(config_class=ProductionConfig) -> Flask:
     @app.route('/api/time')
     def get_current_time():
         return {'time': time.time()}
+    
+    @app.route('/api/tutorial-users', methods=['GET'])
+    def tutorial_users():
+        return jsonify(
+            {
+                'users': [
+                    'alex',
+                    'daniel',
+                    'kempton'
+                ]
+            }
+        )
     
     @login_manager.user_loader
     def load_user(user_id):
@@ -1276,6 +1290,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
 
 if __name__ == '__main__':
     app = create_app()
+    cors = CORS(app)
     app.logger.info("Starting Flask app...")
     try:
         app.run(debug=True, host='0.0.0.0', port=5000)

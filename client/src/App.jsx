@@ -2,11 +2,21 @@ import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import axios from "axios";
 
 function App() {
   const [count, setCount] = useState(0)
   const [currentTime, setCurrentTime] = useState(0);
+  const [array, setArray] = useState([]);
 
+  const fetchAPI = async () => {
+    const response = await axios.get("https://localhost:5000/api/tutorial-users");
+    console.log(response.data.users)
+  }
+
+  useEffect(() => {
+    fetchAPI()
+  }, [])
   useEffect(() => {
     fetch('/api/time').then(res => res.json()).then(data => {
       setCurrentTime(data.time);
@@ -30,7 +40,13 @@ function App() {
         </button>
         <p>The current time is {new Date(currentTime * 1000).toLocaleString()}.</p>
         <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
+          {
+            array.map((user, index) => (
+              <div key={index}>
+                <span>{user}</span>
+                <br></br>
+              </div>
+          ))}
         </p>
       </div>
       <p className="read-the-docs">

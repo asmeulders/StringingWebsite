@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . /app
 
 # Copy the env file to the container
-COPY .env /app/react-with-flask/api/.env
+COPY .env /app/server/.env
 
 # Install any needed packages specified in requirements.txt
 # In production, you would want to ensure that any re-compiled packages
@@ -20,7 +20,7 @@ RUN pip install -r requirements.txt
 RUN apt-get update && apt-get install -y sqlite3
 
 # Define a volume for persisting the database
-VOLUME ["/app/react-with-flask/api/db"]
+VOLUME ["/app/server/db"]
 
 # Make port 5000 available to the world outside this container
 EXPOSE 5000
