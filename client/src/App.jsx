@@ -1,58 +1,72 @@
 import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
 import axios from "axios";
 
 function App() {
-  const [count, setCount] = useState(0)
-  const [currentTime, setCurrentTime] = useState(0);
-  const [array, setArray] = useState([]);
+  const [inputs, setInputs] = useState({});
+  const baseUrl = "http://localhost:5000/api/"
 
-  const fetchAPI = async () => {
-    const response = await axios.get("https://localhost:5000/api/tutorial-users");
-    console.log(response.data.users)
+  const handleChange = (event) => {
+    const username = event.target.name;
+    const pwd = event.target.value;
+    setInputs(values => ({...values, [username]: pwd}))
   }
 
-  useEffect(() => {
-    fetchAPI()
-  }, [])
-  useEffect(() => {
-    fetch('/api/time').then(res => res.json()).then(data => {
-      setCurrentTime(data.time);
-    });
-  }, []);
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    console.log(inputs);
+    const response = await axios.put(baseUrl + "create-user", {
+      username: inputs.username,
+      password: inputs.pwd
+    })
+    console.log(response)
+  }
+
+  const login = async () => {
+    const response = await axios.post(baseUrl + "login", {
+      username: "test",
+      password: "test"
+    })
+  }
+  const createOrder = async () => {
+    const response = await axios.post(baseUrl + "create-order", {
+      customer: "Alex",
+      order_date: "2025-7-2",
+      racket: "Wilson Pro Staff 97",
+      mains_tension: 52,
+      mains_string: "Luxilon ALU Power",
+      crosses_tension: 50,
+      crosses_string: null,
+      replacement_grip: null,
+      paid: false
+    })
+    console.log(response)
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>The current time is {new Date(currentTime * 1000).toLocaleString()}.</p>
-        <p>
-          {
-            array.map((user, index) => (
-              <div key={index}>
-                <span>{user}</span>
-                <br></br>
-              </div>
-          ))}
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div className="App">
+      <form onSubmit={handleSubmit}>
+        <label>Username:
+        <input 
+          type="text" 
+          name="username" 
+          value={inputs.username || ""} 
+          onChange={handleChange}
+        />
+        </label>
+        <br></br>
+        <label>Password:
+          <input 
+            type="password"
+            name="pwd"
+            value={inputs.pwd || ""} 
+            onChange={handleChange}
+          />
+          </label>
+          <input type="submit" value="Submit"/>
+      </form>
+      <input type="button" onClick={() => login()} value="Login test"></input>
+      <input type="button" onClick={() => createOrder()} value="Create order test"></input>
+    </div>
   )
 }
 
