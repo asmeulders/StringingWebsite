@@ -159,7 +159,7 @@ def test_get_orders_by_order_date(order_wilson: Orders):
 
 def test_get_order_by_order_date_not_found(app, session):
     """Test error when fetching nonexistent order by order_value."""
-    with pytest.raises(ValueError, match="No orders found with date '11110101'"):
+    with pytest.raises(ValueError, match="No orders found with date '1111-01-01'"):
         Orders.get_orders_by_order_date(date(1111, 1, 1))
 
 def test_get_orders_by_completed(order_wilson: Orders):

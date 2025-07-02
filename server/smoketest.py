@@ -13,7 +13,7 @@ def run_smoketest():
         "order_id": 1,
         "customer": "Alex",
         "stringer": "Alex",
-        "order_date": "20250610",
+        "order_date": "2025-06-10",
         "racket": "Wilson Pro Staff",
         "mains_tension": 52,
         "mains_string": "Luxilon ALU Power",
@@ -28,7 +28,7 @@ def run_smoketest():
         "order_id": 2,
         "customer": "Rocky",
         "stringer": "Alex",
-        "order_date": "20250618",
+        "order_date": "2025-06-18",
         "racket": "Head Speed MP",
         "mains_tension": 54,
         "mains_string": "Head Velocity",
@@ -41,7 +41,7 @@ def run_smoketest():
 
     updated_wilson = {
         "customer": "Alex",
-        "order_date": "20250611",
+        "order_date": "2025-06-11",
         "racket": "Wilson Pro Staff",
         "mains_tension": 52,
         "mains_string": "Luxilon ALU Power",
@@ -181,7 +181,7 @@ def run_smoketest():
     assert get_order_by_completed_resp.json()["status"] == "success"
     print("Order retrieved successfully - completed")
 
-    wilson_date = "20250610"
+    wilson_date = "2025-06-10"
     get_order_by_date_resp = session.get(f"{base_url}/orders/by-date/{wilson_date}")
     assert get_order_by_date_resp.status_code == 200
     assert get_order_by_date_resp.json()["orders"] == [wilson_id]

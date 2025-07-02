@@ -24,19 +24,19 @@ load_dotenv()
 #     """JSON serializer for objects not serializable by default json code"""
 
 #     if isinstance(obj, date):
-#         return obj.strftime('%Y%m%d')
+#         return obj.strftime('%Y-%m-%d')
 #     raise TypeError ("Type %s not serializable" % type(obj))
 
 # class DateConverter(BaseConverter):
 #     """Extracts a ISO8601 date from the path and validates it."""
 #     def to_python(self, value):
 #         try:
-#             return datetime.datetime.strptime(value, '%Y%m%d').date()
+#             return datetime.datetime.strptime(value, '%Y-%m-%d').date()
 #         except ValueError as e:
 #             raise e
 
 #     def to_url(self, value):
-#         return value.strftime('%Y%m%d')
+#         return value.strftime('%Y-%m-%d')
     
 def create_app(config_class=ProductionConfig) -> Flask:
     """Create a Flask application with the specified configuration.
@@ -65,23 +65,6 @@ def create_app(config_class=ProductionConfig) -> Flask:
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = 'login'
-
-    # Front end test
-    @app.route('/api/time')
-    def get_current_time():
-        return {'time': time.time()}
-    
-    @app.route('/api/tutorial-users', methods=['GET'])
-    def tutorial_users():
-        return jsonify(
-            {
-                'users': [
-                    'alex',
-                    'daniel',
-                    'kempton'
-                ]
-            }
-        )
     
     @login_manager.user_loader
     def load_user(user_id):
@@ -347,8 +330,8 @@ def create_app(config_class=ProductionConfig) -> Flask:
             - order_date (date): The date of the order.
             - racket (str): The name of the racket.
             - mains_tension (int): Value of the mains tension.
-            - crosses_tension (int): Value of the crosses tension.
             - mains_string (str): Name of the string used on the mains.
+            - crosses_tension (int): Value of the crosses tension.
             - crosses_string (str): Name of the string used on the crosses.
             - replacement_grip (str): Name of the replacement grip desired.
             - paid (bool): Boolean for paid status of order.
@@ -377,7 +360,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
                 }), 400)
 
             customer = data["customer"]
-            order_date = datetime.datetime.strptime(data["order_date"], "%Y%m%d").date()
+            order_date = datetime.datetime.strptime(data["order_date"], "%Y-%m-%d").date()
             racket = data["racket"]
             mains_tension = data["mains_tension"]
             mains_string = data["mains_string"]
@@ -692,7 +675,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
         """
         try:
             app.logger.info(f"Request to retrieve orders by order date: {order_date_string}")
-            order_date = datetime.datetime.strptime(order_date_string, "%Y%m%d").date()
+            order_date = datetime.datetime.strptime(order_date_string, "%Y-%m-%d").date()
             orders = Orders.get_orders_by_order_date(order_date)
             return make_response(jsonify({
                 "status": "success",
@@ -746,7 +729,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             new_replacement_grip = data.get("replacement_grip")
 
 
-            old_fields = [order.customer, order.order_date.strftime('%Y%m%d'), order.racket, order.mains_tension, order.mains_string, order.crosses_tension, order.crosses_string, order.replacement_grip]
+            old_fields = [order.customer, order.order_date.strftime('%Y-%m-%d'), order.racket, order.mains_tension, order.mains_string, order.crosses_tension, order.crosses_string, order.replacement_grip]
             logger.info(old_fields[1])
             new_fields = [new_customer, new_order_date, new_racket, new_mains_tension, new_mains_string, new_crosses_tension, new_crosses_string, new_replacement_grip]
             updated_fields = []
@@ -760,12 +743,12 @@ def create_app(config_class=ProductionConfig) -> Flask:
                 else:
                     fields.append(None)
 
-            logger.info(datetime.datetime.strptime(fields[1], '%Y%m%d').date(), type(datetime.datetime.strptime(fields[1], '%Y%m%d').date()))
+            logger.info(datetime.datetime.strptime(fields[1], '%Y-%m-%d').date(), type(datetime.datetime.strptime(fields[1], '%Y-%m-%d').date()))
 
             updated_order = Orders.update_order(
                 order_id,
                 customer=fields[0],
-                order_date=datetime.datetime.strptime(fields[1], '%Y%m%d').date(),
+                order_date=datetime.datetime.strptime(fields[1], '%Y-%m-%d').date(),
                 racket=fields[2],
                 mains_tension=fields[3],
                 mains_string=fields[4],
@@ -837,7 +820,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
         """
         try:
             app.logger.info(f"Request to retrieve orders by order date: {order_date_string}")
-            order_date = datetime.datetime.strptime(order_date_string, "%Y%m%d").date()
+            order_date = datetime.datetime.strptime(order_date_string, "%Y-%m-%d").date()
             Orders.delete_order_by_order_date(order_date)
             app.logger.info(f"Deleted order with date {order_date}.")
             return make_response(jsonify({"status": "success", "message": f"Order with date {order_date_string} deleted."}), 200)
