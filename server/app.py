@@ -2,6 +2,8 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, make_response, Response, request
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_cors import CORS
+from flask_wtf import CSRFProtect
+from flask_wtf.csrf import generate_csrf
 
 from config import ProductionConfig
 
@@ -19,24 +21,6 @@ logger = logging.getLogger(__name__)
 configure_logger(logger)
 
 load_dotenv()
-
-# def json_serial(obj):
-#     """JSON serializer for objects not serializable by default json code"""
-
-#     if isinstance(obj, date):
-#         return obj.strftime('%Y-%m-%d')
-#     raise TypeError ("Type %s not serializable" % type(obj))
-
-# class DateConverter(BaseConverter):
-#     """Extracts a ISO8601 date from the path and validates it."""
-#     def to_python(self, value):
-#         try:
-#             return datetime.datetime.strptime(value, '%Y-%m-%d').date()
-#         except ValueError as e:
-#             raise e
-
-#     def to_url(self, value):
-#         return value.strftime('%Y-%m-%d')
     
 def create_app(config_class=ProductionConfig) -> Flask:
     """Create a Flask application with the specified configuration.
@@ -54,7 +38,6 @@ def create_app(config_class=ProductionConfig) -> Flask:
     configure_logger(app.logger)
 
     app.config.from_object(config_class)
-    # app.url_map.converters['date'] = DateConverter
 
     # Initialize database
     db.init_app(app)
@@ -283,6 +266,12 @@ def create_app(config_class=ProductionConfig) -> Flask:
                 "message": "An internal error occurred while deleting users",
                 "details": str(e)
             }), 500)
+        
+    @app.route("/csrf")
+    def get_csrf():
+        response = jsonify(detail="success")
+        response.headers.set("X-CSRFToken", generate_csrf())
+        return response
 
     # ##########################################################
     # #
@@ -1274,6 +1263,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
 if __name__ == '__main__':
     app = create_app()
     cors = CORS(app)
+    crsf = CSRFProtect(app) 
     app.logger.info("Starting Flask app...")
     try:
         app.run(debug=True, host='0.0.0.0', port=5000)
