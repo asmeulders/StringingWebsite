@@ -13,8 +13,8 @@ class ProductionConfig():
     SECRET_KEY = os.getenv("SECRET_KEY", "test-secret-key")  # Default secret key for testing
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', "sqlite:////app/server/db/app.db")  # Production database URI from environment
-    print(SQLALCHEMY_DATABASE_URI)
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', "sqlite:////app/db/app.db")  # Production database URI from environment
+    print(SQLALCHEMY_DATABASE_URI, type(SQLALCHEMY_DATABASE_URI))
 
 class TestConfig():
     """Testing configuration."""

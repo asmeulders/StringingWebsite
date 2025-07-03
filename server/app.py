@@ -248,8 +248,8 @@ def create_app(config_class=ProductionConfig) -> Flask:
         Raises:
             500 error if there is an issue recreating the Users table.
         """
+        logger.info("Received request to recreate Users table")
         try:
-            app.logger.info("Received request to recreate Users table")
             with app.app_context():
                 Users.__table__.drop(db.engine)
                 Users.__table__.create(db.engine)

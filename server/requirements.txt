@@ -6,3 +6,4 @@ greenlet==3.2.3
 python-dotenv==1.1.0
 requests==2.32.4
 pydantic==2.11.7
+flask-wtf==1.2.2
