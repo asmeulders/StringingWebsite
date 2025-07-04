@@ -26,6 +26,10 @@ function Home() {
     event.preventDefault();
     console.log(inputs);
     await createOrder()
+    for (let field in inputs) {
+      inputs[field] = ''
+    }
+    handleChange(event) // refactor this?
   }
 
   const createOrder = async () => {
@@ -54,8 +58,9 @@ function Home() {
         <p>Home</p>
       </header>
       <a href={baseUrl + "login"}>Login</a><br />
-      <form onSubmit={handleSubmit}>
+      <form id="orderForm" onSubmit={handleSubmit}>
         <input 
+          id='customer'
           type="text" 
           placeholder="Customer"
           name="customer" 
