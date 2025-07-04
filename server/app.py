@@ -35,7 +35,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
     app = Flask(__name__)
     
 
-    configure_logger(app.logger)
+    configure_logger(logger)
 
     app.config.from_object(config_class)
 
@@ -70,7 +70,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             JSON response indicating the health status of the service.
 
         """
-        app.logger.info("Health check endpoint hit")
+        logger.info("Health check endpoint hit")
         return make_response(jsonify({
             'status': 'success',
             'message': 'Service is running'
@@ -120,7 +120,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
                 "message": str(e)
             }), 400)
         except Exception as e:
-            app.logger.error(f"User creation failed: {e}")
+            logger.error(f"User creation failed: {e}")
             return make_response(jsonify({
                 "status": "error",
                 "message": "An internal error occurred while creating user",
@@ -171,7 +171,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
                 "message": str(e)
             }), 401)
         except Exception as e:
-            app.logger.error(f"Login failed: {e}")
+            logger.error(f"Login failed: {e}")
             return make_response(jsonify({
                 "status": "error",
                 "message": "An internal error occurred during login",
@@ -231,7 +231,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
                 "message": str(e)
             }), 400)
         except Exception as e:
-            app.logger.error(f"Password change failed: {e}")
+            logger.error(f"Password change failed: {e}")
             return make_response(jsonify({
                 "status": "error",
                 "message": "An internal error occurred while changing password",
@@ -253,25 +253,25 @@ def create_app(config_class=ProductionConfig) -> Flask:
             with app.app_context():
                 Users.__table__.drop(db.engine)
                 Users.__table__.create(db.engine)
-            app.logger.info("Users table recreated successfully")
+            logger.info("Users table recreated successfully")
             return make_response(jsonify({
                 "status": "success",
                 "message": f"Users table recreated successfully"
             }), 200)
 
         except Exception as e:
-            app.logger.error(f"Users table recreation failed: {e}")
+            logger.error(f"Users table recreation failed: {e}")
             return make_response(jsonify({
                 "status": "error",
                 "message": "An internal error occurred while deleting users",
                 "details": str(e)
             }), 500)
         
-    @app.route("/csrf")
-    def get_csrf():
-        response = jsonify(detail="success")
-        response.headers.set("X-CSRFToken", generate_csrf())
-        return response
+    # @app.route("/csrf")
+    # def get_csrf():
+    #     response = jsonify(detail="success")
+    #     response.headers.set("X-CSRFToken", generate_csrf())
+    #     return response
 
     # ##########################################################
     # #
@@ -290,18 +290,18 @@ def create_app(config_class=ProductionConfig) -> Flask:
             500 error if there is an issue recreating the orders table.
         """
         try:
-            app.logger.info("Received request to recreate orders table")
+            logger.info("Received request to recreate orders table")
             with app.app_context():
                 Orders.__table__.drop(db.engine)
                 Orders.__table__.create(db.engine)
-            app.logger.info("Orders table recreated successfully")
+            logger.info("Orders table recreated successfully")
             return make_response(jsonify({
                 "status": "success",
                 "message": f"Orders table recreated successfully"
             }), 200)
 
         except Exception as e:
-            app.logger.error(f"Orders table recreation failed: {e}")
+            logger.error(f"Orders table recreation failed: {e}")
             return make_response(jsonify({
                 "status": "error",
                 "message": "An internal error occurred while deleting orders",
@@ -310,7 +310,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
 
 
     @app.route('/api/create-order', methods=['POST'])
-    @login_required
+    # @login_required
     def add_order() -> Response:
         """Route to create a new order.
 
@@ -333,7 +333,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             500 error if there is an issue adding the order to the plan.
 
         """
-        app.logger.info("Received request to add a new order")
+        logger.info("Received request to add a new order")
 
         try:
             data = request.get_json()
@@ -342,7 +342,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             missing_fields = [field for field in required_fields if field not in data]
 
             if missing_fields:
-                app.logger.warning(f"Missing required fields: {missing_fields}")
+                logger.warning(f"Missing required fields: {missing_fields}")
                 return make_response(jsonify({
                     "status": "error",
                     "message": f"Missing required fields: {', '.join(missing_fields)}"
@@ -361,7 +361,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             if (
                 not isinstance(customer, str)
             ):
-                app.logger.warning("Invalid input data types - customer")
+                logger.warning("Invalid input data types - customer")
                 return make_response(jsonify({
                     "status": "error",
                     "message": "Invalid input types: customer should be a string"
@@ -370,7 +370,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             if (
                 not isinstance(order_date, date)
             ):
-                app.logger.warning("Invalid input data types - order_date")
+                logger.warning("Invalid input data types - order_date")
                 return make_response(jsonify({
                     "status": "error",
                     "message": "Invalid input types: order_date should be a date object"
@@ -379,7 +379,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             if (
                 not isinstance(racket, str)
             ):
-                app.logger.warning("Invalid input data types - racket")
+                logger.warning("Invalid input data types - racket")
                 return make_response(jsonify({
                     "status": "error",
                     "message": "Invalid input types: racket should be a string"
@@ -388,7 +388,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             if (
                 not isinstance(mains_tension, int)
             ):
-                app.logger.warning("Invalid input data types - mains_tension")
+                logger.warning("Invalid input data types - mains_tension")
                 return make_response(jsonify({
                     "status": "error",
                     "message": "Invalid input types: mains_tension should be an int"
@@ -397,7 +397,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             if (
                 not isinstance(mains_string, str)
             ):
-                app.logger.warning("Invalid input data types - mains_string")
+                logger.warning("Invalid input data types - mains_string")
                 return make_response(jsonify({
                     "status": "error",
                     "message": "Invalid input types: mains_string should be a string"
@@ -406,7 +406,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             if (
                 crosses_tension and not isinstance(crosses_tension, int)
             ):
-                app.logger.warning("Invalid input data types - crosses_tension")
+                logger.warning("Invalid input data types - crosses_tension")
                 return make_response(jsonify({
                     "status": "error",
                     "message": "Invalid input types: crosses_tension should be an int"
@@ -415,7 +415,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             if (
                 crosses_string and not isinstance(crosses_string, str)
             ):
-                app.logger.warning("Invalid input data types - crosses_string")
+                logger.warning("Invalid input data types - crosses_string")
                 return make_response(jsonify({
                     "status": "error",
                     "message": "Invalid input types: crosses_string should be a string"
@@ -424,7 +424,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             if (
                 replacement_grip and not isinstance(replacement_grip, str)
             ):
-                app.logger.warning("Invalid input data types - replacement_grip")
+                logger.warning("Invalid input data types - replacement_grip")
                 return make_response(jsonify({
                     "status": "error",
                     "message": "Invalid input types: replacement_grip should be a string"
@@ -433,7 +433,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             if (
                 not isinstance(paid, bool)
             ):
-                app.logger.warning("Invalid input data types - paid")
+                logger.warning("Invalid input data types - paid")
                 return make_response(jsonify({
                     "status": "error",
                     "message": "Invalid input types: paid should be a bool"
@@ -441,17 +441,17 @@ def create_app(config_class=ProductionConfig) -> Flask:
             
             paid_status = "paid" if paid else "unpaid"
 
-            app.logger.info(f"Adding order: {customer} - {racket}: {order_date} - {paid_status}")
+            logger.info(f"Adding order: {customer} - {racket}: {order_date} - {paid_status}")
             Orders.create_order(customer=customer, order_date=order_date, racket=racket, mains_tension=mains_tension, mains_string=mains_string, crosses_tension=crosses_tension, crosses_string=crosses_string, replacement_grip=replacement_grip, paid=paid)
 
-            app.logger.info(f"Order added successfully: {customer} - {racket}: {order_date} - {paid_status}")
+            logger.info(f"Order added successfully: {customer} - {racket}: {order_date} - {paid_status}")
             return make_response(jsonify({
                 "status": "success",
                 "message": f"Order: '{customer} - {racket}: {order_date} - {paid_status}' added successfully"
             }), 201)
 
         except Exception as e:
-            app.logger.error(f"Failed to add order: {e}")
+            logger.error(f"Failed to add order: {e}")
             return make_response(jsonify({
                 "status": "error",
                 "message": "An internal error occurred while adding the order",
@@ -476,19 +476,19 @@ def create_app(config_class=ProductionConfig) -> Flask:
 
         """
         try:
-            app.logger.info(f"Received request to delete order with ID {order_id}")
+            logger.info(f"Received request to delete order with ID {order_id}")
 
             # Check if the order exists before attempting to delete
             order = Orders.get_order_by_id(order_id)
             if not order:
-                app.logger.warning(f"Order with ID {order_id} not found.")
+                logger.warning(f"Order with ID {order_id} not found.")
                 return make_response(jsonify({
                     "status": "error",
                     "message": f"Order with ID {order_id} not found"
                 }), 400)
 
             Orders.delete_order(order_id)
-            app.logger.info(f"Successfully deleted order with ID {order_id}")
+            logger.info(f"Successfully deleted order with ID {order_id}")
 
             return make_response(jsonify({
                 "status": "success",
@@ -496,7 +496,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             }), 200)
 
         except Exception as e:
-            app.logger.error(f"Failed to delete order: {e}")
+            logger.error(f"Failed to delete order: {e}")
             return make_response(jsonify({
                 "status": "error",
                 "message": "An internal error occurred while deleting the order",
@@ -518,11 +518,11 @@ def create_app(config_class=ProductionConfig) -> Flask:
         """
         try:
             # Extract query parameter for sorting by play count
-            app.logger.info(f"Received request to retrieve all orders from history")
+            logger.info(f"Received request to retrieve all orders from history")
 
             orders = Orders.get_all_orders()
 
-            app.logger.info(f"Successfully retrieved {len(orders)} orders from the catalog")
+            logger.info(f"Successfully retrieved {len(orders)} orders from the catalog")
 
             return make_response(jsonify({
                 "status": "success",
@@ -531,7 +531,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             }), 200)
 
         except Exception as e:
-            app.logger.error(f"Failed to retrieve orders: {e}")
+            logger.error(f"Failed to retrieve orders: {e}")
             return make_response(jsonify({
                 "status": "error",
                 "message": "An internal error occurred while retrieving orders",
@@ -556,17 +556,17 @@ def create_app(config_class=ProductionConfig) -> Flask:
 
         """
         try:
-            app.logger.info(f"Received request to retrieve order with ID {order_id}")
+            logger.info(f"Received request to retrieve order with ID {order_id}")
 
             order = Orders.get_order_by_id(order_id)
             if not order:
-                app.logger.warning(f"Order with ID {order_id} not found.")
+                logger.warning(f"Order with ID {order_id} not found.")
                 return make_response(jsonify({
                     "status": "error",
                     "message": f"Order with ID {order_id} not found"
                 }), 400)
 
-            app.logger.info(f"Successfully retrieved order {order.order_id} for {order.customer}")
+            logger.info(f"Successfully retrieved order {order.order_id} for {order.customer}")
 
             return make_response(jsonify({
                 "status": "success",
@@ -575,7 +575,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             }), 200)
 
         except Exception as e:
-            app.logger.error(f"Failed to retrieve order by ID: {e}")
+            logger.error(f"Failed to retrieve order by ID: {e}")
             return make_response(jsonify({
                 "status": "error",
                 "message": "An internal error occurred while retrieving the order",
@@ -598,20 +598,20 @@ def create_app(config_class=ProductionConfig) -> Flask:
             500 error if there is an issue retrieving the orders.
         """
         try:
-            app.logger.info(f"Request to retrieve orders by customer: {customer}")
+            logger.info(f"Request to retrieve orders by customer: {customer}")
             orders = Orders.get_orders_by_customer(customer)
             return make_response(jsonify({
                 "status": "success",
                 "orders": [g.order_id for g in orders] 
             }), 200)
         except ValueError as e:
-            app.logger.warning(f"Order retrieval failed: {e}")
+            logger.warning(f"Order retrieval failed: {e}")
             return make_response(jsonify({
                 "status": "error",
                 "message": str(e)
             }), 400)
         except Exception as e:
-            app.logger.error(f"Internal error retrieving orders by customer: {e}")
+            logger.error(f"Internal error retrieving orders by customer: {e}")
             return make_response(jsonify({
                 "status": "error", 
                 "message": "Internal server error"
@@ -633,7 +633,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             500 error for unexpected database issues.
         """
         try:
-            app.logger.info(f"Request to retrieve orders by completion status: {completed}")
+            logger.info(f"Request to retrieve orders by completion status: {completed}")
             status = completed.lower() == 'true'
             orders = Orders.get_orders_by_completed(status)
             return make_response(jsonify({
@@ -641,10 +641,10 @@ def create_app(config_class=ProductionConfig) -> Flask:
                 "orders": [g.order_id for g in orders]
             }), 200)
         except ValueError as e:
-            app.logger.warning(f"Order retrieval failed: {e}")
+            logger.warning(f"Order retrieval failed: {e}")
             return make_response(jsonify({"status": "error", "message": str(e)}), 400)
         except Exception as e:
-            app.logger.error(f"Internal error retrieving completed orders: {e}")
+            logger.error(f"Internal error retrieving completed orders: {e}")
             return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
 
     @app.route('/api/orders/by-date/<string:order_date_string>', methods=['GET'])
@@ -663,7 +663,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             500 error if database issues occur.
         """
         try:
-            app.logger.info(f"Request to retrieve orders by order date: {order_date_string}")
+            logger.info(f"Request to retrieve orders by order date: {order_date_string}")
             order_date = datetime.datetime.strptime(order_date_string, "%Y-%m-%d").date()
             orders = Orders.get_orders_by_order_date(order_date)
             return make_response(jsonify({
@@ -671,10 +671,10 @@ def create_app(config_class=ProductionConfig) -> Flask:
                 "orders": [g.order_id for g in orders]
             }), 200)
         except ValueError as e:
-            app.logger.warning(f"Order retrieval failed: {e}")
+            logger.warning(f"Order retrieval failed: {e}")
             return make_response(jsonify({"status": "error", "message": str(e)}), 400)
         except Exception as e:
-            app.logger.error(f"Error retrieving orders by order value: {e}")
+            logger.error(f"Error retrieving orders by order value: {e}")
             return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
 
     @app.route('/api/update-order/<int:order_id>', methods=['PATCH']) 
@@ -745,7 +745,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
                 crosses_string=fields[6],
                 replacement_grip=fields[7],
             )
-            app.logger.info(f"Updated order {order_id} successfully.")
+            logger.info(f"Updated order {order_id} successfully.")
 
             return make_response(jsonify({
                 "status": "success", 
@@ -753,13 +753,13 @@ def create_app(config_class=ProductionConfig) -> Flask:
                 "updated_fields": updated_fields
             }), 200)
         except ValueError as e:
-            app.logger.warning(f"Update failed for order {order_id}: {e}")
+            logger.warning(f"Update failed for order {order_id}: {e}")
             return make_response(jsonify({
                 "status": "error", 
                 "message": str(e)
             }), 400)
         except Exception as e:
-            app.logger.error(f"Internal error updating order {order_id}: {e}")
+            logger.error(f"Internal error updating order {order_id}: {e}")
             return make_response(jsonify({
                 "status": "error",
                 "message": "Internal server error"
@@ -782,13 +782,13 @@ def create_app(config_class=ProductionConfig) -> Flask:
         """
         try:
             Orders.delete_order_by_customer(customer)
-            app.logger.info(f"Deleted order with customer {customer}.")
+            logger.info(f"Deleted order with customer {customer}.")
             return make_response(jsonify({"status": "success", "message": f"Order with customer '{customer}' deleted."}), 200)
         except ValueError as e:
-            app.logger.warning(f"Order delete failed for customer {customer}: {e}")
+            logger.warning(f"Order delete failed for customer {customer}: {e}")
             return make_response(jsonify({"status": "error", "message": str(e)}), 400)
         except Exception as e:
-            app.logger.error(f"Internal error deleting order by customer {customer}: {e}")
+            logger.error(f"Internal error deleting order by customer {customer}: {e}")
             return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
 
 
@@ -808,16 +808,16 @@ def create_app(config_class=ProductionConfig) -> Flask:
             500 error on DB issues.
         """
         try:
-            app.logger.info(f"Request to retrieve orders by order date: {order_date_string}")
+            logger.info(f"Request to retrieve orders by order date: {order_date_string}")
             order_date = datetime.datetime.strptime(order_date_string, "%Y-%m-%d").date()
             Orders.delete_order_by_order_date(order_date)
-            app.logger.info(f"Deleted order with date {order_date}.")
+            logger.info(f"Deleted order with date {order_date}.")
             return make_response(jsonify({"status": "success", "message": f"Order with date {order_date_string} deleted."}), 200)
         except ValueError as e:
-            app.logger.warning(f"Order delete failed for date {order_date}: {e}")
+            logger.warning(f"Order delete failed for date {order_date}: {e}")
             return make_response(jsonify({"status": "error", "message": str(e)}), 400)
         except Exception as e:
-            app.logger.error(f"Internal error deleting order by date {order_date}: {e}")
+            logger.error(f"Internal error deleting order by date {order_date}: {e}")
             return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
 
 
@@ -839,13 +839,13 @@ def create_app(config_class=ProductionConfig) -> Flask:
         try:
             status = completed.lower() == 'true'
             Orders.delete_order_by_completed(status)
-            app.logger.info(f"Deleted order with completed status {status}.")
+            logger.info(f"Deleted order with completed status {status}.")
             return make_response(jsonify({"status": "success", "message": f"Order with completed={status} deleted."}), 200)
         except ValueError as e:
-            app.logger.warning(f"Delete by completed failed: {e}")
+            logger.warning(f"Delete by completed failed: {e}")
             return make_response(jsonify({"status": "error", "message": str(e)}), 400)
         except Exception as e:
-            app.logger.error(f"Error deleting order by completed: {e}")
+            logger.error(f"Error deleting order by completed: {e}")
             return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
 
     
@@ -866,7 +866,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
         """
         try:
             completed_order = Orders.mark_completed(order_id)
-            app.logger.info(f"Completed order {order_id} successfully.")
+            logger.info(f"Completed order {order_id} successfully.")
 
             return make_response(jsonify({
                 "status": "success", 
@@ -874,13 +874,13 @@ def create_app(config_class=ProductionConfig) -> Flask:
             }), 200)
         
         except ValueError as e:
-            app.logger.warning(f"Completion failed for order {order_id}: {e}")
+            logger.warning(f"Completion failed for order {order_id}: {e}")
             return make_response(jsonify({
                 "status": "error", 
                 "message": str(e)
             }), 400)
         except Exception as e:
-            app.logger.error(f"Internal error updating order {order_id}: {e}")
+            logger.error(f"Internal error updating order {order_id}: {e}")
             return make_response(jsonify({
                 "status": "error",
                 "message": "Internal server error"
@@ -904,7 +904,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
         """
         try:
             paid_order = Orders.mark_paid(order_id)
-            app.logger.info(f"Paid for order {order_id} successfully.")
+            logger.info(f"Paid for order {order_id} successfully.")
 
             return make_response(jsonify({
                 "status": "success", 
@@ -912,13 +912,13 @@ def create_app(config_class=ProductionConfig) -> Flask:
             }), 200)
         
         except ValueError as e:
-            app.logger.warning(f"Payment failed for order {order_id}: {e}")
+            logger.warning(f"Payment failed for order {order_id}: {e}")
             return make_response(jsonify({
                 "status": "error", 
                 "message": str(e)
             }), 400)
         except Exception as e:
-            app.logger.error(f"Internal error paying for order {order_id}: {e}")
+            logger.error(f"Internal error paying for order {order_id}: {e}")
             return make_response(jsonify({
                 "status": "error",
                 "message": "Internal server error"
@@ -949,7 +949,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             stringer = data['stringer']
 
             assigned_order = Orders.assign_stringer(order_id, stringer)
-            app.logger.info(f"Assigned {stringer} to order {order_id} successfully.")
+            logger.info(f"Assigned {stringer} to order {order_id} successfully.")
 
             return make_response(jsonify({
                 "status": "success", 
@@ -957,317 +957,28 @@ def create_app(config_class=ProductionConfig) -> Flask:
             }), 200)
         
         except ValueError as e:
-            app.logger.warning(f"Assignment failed for order {order_id}: {e}")
+            logger.warning(f"Assignment failed for order {order_id}: {e}")
             return make_response(jsonify({
                 "status": "error", 
                 "message": str(e)
             }), 400)
         except Exception as e:
-            app.logger.error(f"Internal error assigning {stringer} to order {order_id}: {e}")
+            logger.error(f"Internal error assigning {stringer} to order {order_id}: {e}")
             return make_response(jsonify({
                 "status": "error",
                 "message": "Internal server error"
             }), 500)
-        
-    # @app.route('/api/orders/recommendations/<int:order_id>', methods=['GET'])
-    # @login_required
-    # def get_exercise_recommendations(order_id: int) -> Response:
-    #     """Route to get exercise recommendations for a order.
-
-    #     Path Parameter:
-    #         - order_id (int): The ID of the order.
-
-    #     Returns:
-    #         JSON list of recommended exercises.
-
-    #     Raises:
-    #         400 if order not found.
-    #         500 on external API or DB failure.
-    #     """
-    #     try:
-    #         recommendations = orders.get_exercise_recommendations(order_id)
-    #         app.logger.info(f"Retrieved exercise recommendations for order {order_id}. {recommendations}")
-    #         return make_response(jsonify({
-    #             "status": "success",
-    #             "recommendations": recommendations
-    #         }), 200)
-    #     except ValueError as e:
-    #         app.logger.warning(f"Recommendation fetch failed: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error",
-    #             "message": str(e)
-    #         }), 400)
-    #     except Exception as e:
-    #         app.logger.error(f"Internal error getting recommendations: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error",
-    #             "message": "Internal server error"
-    #         }), 500)
-
-
-    # @app.route('/api/orders/log-session/<int:order_id>', methods=['POST'])
-    # @login_required
-    # def log_workout(order_id: int) -> Response:
-    #     """Route to log a workout session for a order.
-
-    #     Path Parameter:
-    #         - order_id (int): The ID of the order.
-
-    #     Expected JSON Input:
-    #         - amount (float): Progress amount.
-    #         - exercise_type (str): Exercise name.
-    #         - duration (int): Time in minutes.
-    #         - intensity (str): Intensity level.
-    #         - note (str, optional): Personal notes.
-
-    #     Returns:
-    #         JSON message with updated progress.
-
-    #     Raises:
-    #         400 if validation fails.
-    #         500 on DB error.
-    #     """
-    #     try:
-    #         data = request.get_json()
-    #         order = orders.get_order_by_id(order_id)
-    #         message = order.log_workout_session(
-    #             amount=data.get("amount"),
-    #             exercise_type=data.get("exercise_type"),
-    #             duration=data.get("duration"),
-    #             intensity=data.get("intensity"),
-    #             note=data.get("note", "")
-    #         )
-    #         app.logger.info(f"Workout logged for order {order_id}: {message}")
-    #         return make_response(jsonify({
-    #             "status": "success",
-    #             "message": message
-    #         }), 200)
-    #     except ValueError as e:
-    #         app.logger.warning(f"Workout log failed for order {order_id}: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error",
-    #             "message": str(e)
-    #         }), 400)
-    #     except Exception as e:
-    #         app.logger.error(f"Internal error logging workout for order {order_id}: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error",
-    #             "message": "Internal server error"
-    #         }), 500)
-
-
-    # ############################################################
-    # #
-    # # Plan Add / Remove
-    # #
-    # ############################################################
-
-
-    # @app.route('/api/add-order-to-plan/<int:order_id>', methods=['POST'])
-    # @login_required
-    # def add_order_to_plan(order_id: int) -> Response:
-    #     """Route to add a order to the plan by order_id.
-
-    #     Path Parameter:
-    #         - order_id (int): The ID of the order.
-
-    #     Returns:
-    #         JSON response indicating success of the addition.
-
-    #     Raises:
-    #         400 error if required fields are missing or the order does not exist.
-    #         500 error if there is an issue adding the order to the plan.
-
-    #     """
-    #     try:
-    #         app.logger.info("Received request to add order to plan")
-
-    #         app.logger.info(f"Looking up order with id {order_id}")
-    #         order = orders.get_order_by_id(order_id=order_id)
-
-    #         if not order:
-    #             app.logger.warning(f"order not found")
-    #             return make_response(jsonify({
-    #                 "status": "error",
-    #                 "message": f"order not found in catalog"
-    #             }), 400)
-
-    #         plan_model.add_order_to_plan(order_id)
-    #         app.logger.info(f"Successfully added order to plan: {order.target} - {order.order_progress} out of {order.order_value}")
-
-    #         return make_response(jsonify({
-    #             "status": "success",
-    #             "message": f"order {order.target} - {order.order_progress} out of {order.order_value} added to plan"
-    #         }), 200)
-
-    #     except Exception as e:
-    #         app.logger.error(f"Failed to add order to plan: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error",
-    #             "message": "An internal error occurred while adding the order to the plan",
-    #             "details": str(e)
-    #         }), 500)
-
-
-    # @app.route('/api/remove-order-from-plan/<int:order_id>', methods=['DELETE'])
-    # @login_required
-    # def remove_order_by_order_id(order_id:int) -> Response:
-    #     """Route to remove a order from the plan by order_id.
-
-    #     Path Parameter:
-    #         - order_id (int): The ID of the order.
-
-    #     Returns:
-    #         JSON response indicating success of the removal.
-
-    #     Raises:
-    #         400 error if required fields are missing or the order does not exist in the plan.
-    #         500 error if there is an issue removing the order.
-
-    #     """
-    #     try:
-    #         app.logger.info("Received request to remove order from plan")
-
-    #         app.logger.info(f"Looking up order to remove: id - {order_id}")
-    #         order = orders.get_order_by_id(order_id)
-
-    #         if not order:
-    #             app.logger.warning(f"order with id {order_id} not found in catalog")
-    #             return make_response(jsonify({
-    #                 "status": "error",
-    #                 "message": f"order with id {order_id} not found in catalog"
-    #             }), 400)
-
-    #         plan_model.remove_order_by_order_id(order.id)
-    #         app.logger.info(f"Successfully removed order with id {order_id} from plan")
-
-    #         return make_response(jsonify({
-    #             "status": "success",
-    #             "message": f"order with id {order_id} removed from plan"
-    #         }), 200)
-
-    #     except Exception as e:
-    #         app.logger.error(f"Failed to remove order from plan: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error",
-    #             "message": "An internal error occurred while removing the order from the plan",
-    #             "details": str(e)
-    #         }), 500)
-
-
-    # @app.route('/api/clear-plan', methods=['POST'])
-    # @login_required
-    # def clear_plan() -> Response:
-    #     """Route to clear all orders from the plan.
-
-    #     Returns:
-    #         JSON response indicating success of the operation.
-
-    #     Raises:
-    #         500 error if there is an issue clearing the plan.
-
-    #     """
-    #     try:
-    #         app.logger.info("Received request to clear the plan")
-
-    #         plan_model.clear_plan()
-
-    #         app.logger.info("Successfully cleared the plan")
-    #         return make_response(jsonify({
-    #             "status": "success",
-    #             "message": "plan cleared"
-    #         }), 200)
-
-    #     except Exception as e:
-    #         app.logger.error(f"Failed to clear plan: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error",
-    #             "message": "An internal error occurred while clearing the plan",
-    #             "details": str(e)
-    #         }), 500)
-
-
-    # ############################################################
-    # #
-    # # View plan
-    # #
-    # ############################################################
-
-
-    # @app.route('/api/get-all-orders-from-plan', methods=['GET'])
-    # @login_required
-    # def get_all_orders_from_plan() -> Response:
-    #     """Retrieve all orders in the plan.
-
-    #     Returns:
-    #         JSON response containing the list of orders.
-
-    #     Raises:
-    #         500 error if there is an issue retrieving the plan.
-
-    #     """
-    #     try:
-    #         app.logger.info("Received request to retrieve all orders from the plan.")
-
-    #         orders = plan_model.get_all_orders()
-    #         order_ids = [order.id for order in orders]
-
-    #         app.logger.info(f"Successfully retrieved {len(orders)} orders from the plan.")
-    #         return make_response(jsonify({
-    #             "status": "success",
-    #             "orders": order_ids
-    #         }), 200)
-
-    #     except Exception as e:
-    #         app.logger.error(f"Failed to retrieve orders from plan: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error",
-    #             "message": "An internal error occurred while retrieving the plan",
-    #             "details": str(e)
-    #         }), 500)
-        
-    
-    # @app.route('/api/get-plan-progress', methods=['GET'])
-    # @login_required
-    # def get_plan_progress() -> Response:
-    #     """Retrieve progress of orders in the plan.
-
-    #     Returns:
-    #         JSON response containing the percentage of orders completed.
-
-    #     Raises:
-    #         500 error if there is an issue retrieving progress.
-
-    #     """
-    #     try:
-    #         app.logger.info("Received request to get progress of the plan.")
-
-    #         percentage = plan_model.get_plan_progress()
-
-    #         app.logger.info(f"Successfully retrieved percentage of orders completed in the plan.")
-    #         return make_response(jsonify({
-    #             "status": "success",
-    #             "percentage": percentage
-    #         }), 200)
-
-    #     except Exception as e:
-    #         app.logger.error(f"Failed to retrieve orders from plan: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error",
-    #             "message": "An internal error occurred while retrieving the plan",
-    #             "details": str(e)
-    #         }), 500)
 
     return app
 
 if __name__ == '__main__':
     app = create_app()
     cors = CORS(app)
-    crsf = CSRFProtect(app) 
-    app.logger.info("Starting Flask app...")
+    # crsf = CSRFProtect(app) 
+    logger.info("Starting Flask app...")
     try:
         app.run(debug=True, host='0.0.0.0', port=5000)
     except Exception as e:
-        app.logger.error(f"Flask app encountered an error: {e}")
+        logger.error(f"Flask app encountered an error: {e}")
     finally:
-        app.logger.info("Flask app has stopped.")
+        logger.info("Flask app has stopped.")

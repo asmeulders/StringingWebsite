@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react'
 import axios from "axios";
 import Home from './Home.jsx';
 import Login from './Login.jsx';
+import Register from './Register.jsx'
 import { BrowserRouter as Router, Route, Routes} from "react-router-dom"
 
 function App() {
-  axios.defaults.withCredentials = true // login stuff; 'supposed to go in index.js'
+  // axios.defaults.withCredentials = true // login stuff; 'supposed to go in index.js'
 
   return (
     <Router>
@@ -15,6 +16,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
           </Routes>
         </div>
       </div>

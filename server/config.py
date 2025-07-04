@@ -3,7 +3,7 @@ import os
 class ProductionConfig():
     """Production configuration."""
     DEBUG = False
-    SESSION_PROTECTION = "strong"
+    # SESSION_PROTECTION = "strong"
     SESSION_COOKIE_SECURE = False  # Needless to say, don't do this
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'

@@ -1,46 +1,46 @@
 import { useState, useEffect } from 'react'
 import axios from "axios";
 
-function Login() {
+function Register() {
   const [inputs, setInputs] = useState({});
   const baseUrl = "http://localhost:5173/"
   const apiUrl = "http://localhost:5000/api/"
 
   const handleChange = (event) => {
-    const name = event.target.name;
-    const value = event.target.value;
-    setInputs(values => ({...values, [name]: value}))
+    const username = event.target.name;
+    const pwd = event.target.value;
+    setInputs(values => ({...values, [username]: pwd}))
   }
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     console.log(inputs);
-    await login()
-    window.location.href = baseUrl
-  }
+    await createUser()
+    window.location.href = baseUrl + "login"
+  }    
 
-  const login = async () => {
+  const createUser = async () => {
     try {
-      const response = await axios.post(apiUrl + "login", {
+      const response = await axios.put(apiUrl + "create-user", {
         username: inputs.username,
         password: inputs.pwd
       })
       console.log(response)
-      document.getElementById("loginMessage").innerHTML = response.data.message;
+      document.getElementById("registerMessage").innerHTML = response.data.message;
     }
     catch(e) {
-      document.getElementById("loginMessage").innerHTML = e.response.data.message;
+      document.getElementById("registerMessage").innerHTML = e.response.data.message;
     }
   }
 
   return (
-    <div className="Login">
+    <div className="Register">
       <header>
         <h2>Racket Tracker</h2>
-        <p>Login</p>
+        <p>Register</p>
       </header>
       <p>
-        No account yet? <a href={baseUrl + "register"}>Create an account</a>
+        Have an account? <a href={baseUrl + "login"}>Login</a>
       </p>
       <form onSubmit={handleSubmit}>
         <input 
@@ -59,11 +59,11 @@ function Login() {
             onChange={handleChange}
           />
           <br></br>
-          <input type="submit" value="Login"/>
+          <input type="submit" value="Create Account"/>
       </form>
-      <p id="loginMessage"></p>
+      <p id="registerMessage"></p>
     </div>
   )
 }
 
-export default Login
+export default Register
