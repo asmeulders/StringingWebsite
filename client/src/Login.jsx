@@ -15,8 +15,10 @@ function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     console.log(inputs);
-    await login()
-    window.location.href = baseUrl
+    let status = await login()
+    if ( status == 'success' ) {
+      window.location.href = baseUrl + 'dashboard'
+    }
   }
 
   const login = async () => {
@@ -27,9 +29,12 @@ function Login() {
       })
       console.log(response)
       document.getElementById("loginMessage").innerHTML = response.data.message;
+      return response.data.status
     }
     catch(e) {
+      console.log(e.response)
       document.getElementById("loginMessage").innerHTML = e.response.data.message;
+      return e.response.data.status
     }
   }
 

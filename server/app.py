@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from flask import Flask, jsonify, make_response, Response, request
+from flask import Flask, jsonify, make_response, Response, request, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_cors import CORS
 from flask_wtf import CSRFProtect
@@ -60,7 +60,12 @@ def create_app(config_class=ProductionConfig) -> Flask:
             "message": "Authentication required"
         }), 401)
 
-    # plan_model = PlanModel()
+    @app.route('/api/check_session', methods=['GET'])
+    def check_session():
+        user = Users.query.filter(Users.id == session.get('user_id')).first()
+        if user:
+            return user.to_dict(), 200
+        return {'error': 'Unauthorized'}, 401
 
     @app.route('/api/health', methods=['GET'])
     def healthcheck() -> Response:
@@ -310,7 +315,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
 
 
     @app.route('/api/create-order', methods=['POST'])
-    # @login_required
+    @login_required
     def add_order() -> Response:
         """Route to create a new order.
 
