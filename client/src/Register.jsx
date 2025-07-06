@@ -36,8 +36,14 @@ function Register() {
   return (
     <div className="Register">
       <header>
-        <h2>Racket Tracker</h2>
-        <p>Register</p>
+        <div class="topbar">
+          <a href={ baseUrl }>Racket Tracker</a>
+          <a id='loginbutton' href={ baseUrl + "login" }>Login</a>
+        </div>
+        <div class="topnav">
+          <a href={ baseUrl + "dashboard" }>Dashboard</a>
+          <a href={ baseUrl + "create-order" }>Create Order</a>
+        </div> 
       </header>
       <p>
         Have an account? <a href={baseUrl + "login"}>Login</a>

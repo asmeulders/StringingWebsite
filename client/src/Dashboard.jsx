@@ -2,110 +2,52 @@ import { useState, useEffect } from 'react'
 import axios from "axios";
 
 function Dashboard() {
-  const [inputs, setInputs] = useState({});
   const baseUrl = "http://localhost:3000/"
   const apiUrl = "http://localhost:5000/api/"
 
-  const today = () => {
-    var today = new Date();
-    var dd = String(today.getDate()).padStart(2, '0');
-    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-    var yyyy = today.getFullYear();
+  var dropdown = document.getElementsByClassName("dropdown-btn");
+  var i;
 
-    today = yyyy + '-' + mm + '-' + dd;
-    return today;
-  }
-
-  const handleChange = (event) => {
-    const name = event.target.name;
-    const value = event.target.value;
-    setInputs(values => ({...values, [name]: value}))
-  }
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    console.log(inputs);
-    await createOrder()
-    for (let field in inputs) {
-      inputs[field] = ''
-    }
-    handleChange(event) // refactor this?
-  }
-
-  const createOrder = async () => {
-    var dateToday = today()
-
-    let paid = document.getElementById("paidCheckbox").value == 'Paid'
-
-    const response = await axios.post(apiUrl + "create-order", {
-      customer: inputs.customer,
-      order_date: dateToday,
-      racket: inputs.racket,
-      mains_tension: parseInt(inputs.mainsTension),
-      mains_string: inputs.mainsString,
-      crosses_tension: parseInt(inputs.mainsTension),
-      crosses_string: inputs.mainsString,
-      replacement_grip: inputs.replacementGrip,
-      paid: paid
-    })
-    console.log(response)
-  }
+  for (i = 0; i < dropdown.length; i++) {
+    dropdown[i].addEventListener("click", function() {
+      this.classList.toggle("active");
+      var dropdownContent = this.nextElementSibling;
+      if (dropdownContent.style.display === "block") {
+        dropdownContent.style.display = "none";
+      } else {
+        dropdownContent.style.display = "block";
+      }
+    });
+  } 
 
   return (
     <div className="Dashboard">
-      <header>
-        <h2>Racket Tracker</h2>
-        <p>Dashboard</p>
-      </header>
-      <a href={apiUrl + 'logout'}>Logout</a><br/>
-      <form id="orderForm" onSubmit={handleSubmit}>
-        <input 
-          id='customer'
-          type="text" 
-          placeholder="Customer"
-          name="customer" 
-          value={inputs.customer || ""} 
-          onChange={handleChange}
-        /><br/>
-        <input 
-          type="text"
-          placeholder="Racket"
-          name="racket"
-          value={inputs.racket || ""} 
-          onChange={handleChange}
-        /><br/>
-        <input 
-          type="number"
-          placeholder="Mains tension"
-          name="mainsTension"
-          value={inputs.mainsTension || ""}
-          onChange={handleChange}
-        /><br/>
-        <input 
-          type="text"
-          placeholder="Mains string"
-          name="mainsString"
-          value={inputs.mainsString || ""}
-          onChange={handleChange}
-        /><br/>
-        <input 
-          type="text"
-          placeholder="Replacement Grip"
-          name="replacementGrip"
-          value={inputs.replacementGrip || ""}
-          onChange={handleChange}
-        /><br/>
-        <input 
-          id='paidCheckbox'
-          type="checkbox"
-          name="paid"
-          value='Paid'
-          onChange={handleChange}
-        />
-        <label for="paid"> Paid</label><br/>
-        <input type="submit" value="Create Order"/>
-      </form>
-      <p id="orderMessage"></p>
+      {/* <header>
+        <div class="topbar">
+          <a href={ baseUrl }>Racket Tracker</a>
+          <a id='loginbutton' href={ baseUrl + "login" }>Login</a>
+        </div>
+        <div class="topnav">
+          <a href={ baseUrl + "dashboard" }>Dashboard</a>
+          <a href={ baseUrl + "create-order" }>Create Order</a>
+        </div> 
+      </header> */}
+      
+      <div class="sidenav">
+        <a href="#about">About</a>
+        <a href="#services">Services</a>
+        <a href="#clients">Clients</a>
+        <a href="#contact">Contact</a>
+        <button class="dropdown-btn">Dropdown
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-container">
+          <a href="#">Link 1</a>
+          <a href="#">Link 2</a>
+          <a href="#">Link 3</a>
+        </div>
+        <a href="#contact">Search</a>
+      </div> 
     </div>
   )
 }
