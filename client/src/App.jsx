@@ -4,6 +4,7 @@ import Home from './Home.jsx';
 import Login from './Login.jsx';
 import Register from './Register.jsx'
 import Dashboard from './Dashboard.jsx'
+import CreateOrder from './CreateOrder.jsx'
 import { BrowserRouter as Router, Route, Routes} from "react-router-dom"
 
 function App() {
@@ -11,16 +12,16 @@ function App() {
   const [user, setUser] = useState(null);
   const apiUrl = "http://localhost:5000/api/"
 
-  useEffect(() => {
-    async function fetchData() {
-      const response = await axios.get(apiUrl + "check_session");
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data);
-      }
-    }
-    fetchData();
-  }, []);
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     const response = await axios.get(apiUrl + "check_session");
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       setUser(data);
+  //     }
+  //   }
+  //   fetchData();
+  // }, []);
 
   // function logout() {
   //   setUser(null);
@@ -40,6 +41,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/create-order" element={<CreateOrder />} />
           </Routes>
         </div>
       </div>

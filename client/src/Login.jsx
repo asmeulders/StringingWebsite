@@ -3,7 +3,7 @@ import axios from "axios";
 
 function Login() {
   const [inputs, setInputs] = useState({});
-  const baseUrl = "http://localhost:5173/"
+  const baseUrl = "http://localhost:3000/"
   const apiUrl = "http://localhost:5000/api/"
 
   const handleChange = (event) => {

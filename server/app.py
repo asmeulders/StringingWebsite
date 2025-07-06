@@ -184,7 +184,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             }), 500)
 
     @app.route('/api/logout', methods=['POST'])
-    @login_required
+    # @login_required
     def logout() -> Response:
         """Log out the current user.
 
@@ -199,7 +199,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
         }), 200)
 
     @app.route('/api/change-password', methods=['POST'])
-    @login_required
+    # @login_required
     def change_password() -> Response:
         """Change the password for the current user.
 
@@ -315,7 +315,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
 
 
     @app.route('/api/create-order', methods=['POST'])
-    @login_required
+    # @login_required
     def add_order() -> Response:
         """Route to create a new order.
 
@@ -465,7 +465,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
 
 
     @app.route('/api/delete-order/<int:order_id>', methods=['DELETE'])
-    @login_required
+    # @login_required
     def delete_order(order_id: int) -> Response:
         """Route to delete a order by ID.
 
@@ -510,7 +510,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
 
 
     @app.route('/api/get-all-orders-from-history', methods=['GET'])
-    @login_required
+    # @login_required
     def get_all_orders() -> Response:
         """Route to retrieve all orders from the history (non-deleted).
 
@@ -545,7 +545,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
 
 
     @app.route('/api/get-order-from-history-by-id/<int:order_id>', methods=['GET'])
-    @login_required
+    # @login_required
     def get_order_by_id(order_id: int) -> Response:
         """Route to retrieve a order by its ID.
 
@@ -588,7 +588,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             }), 500)
 
     @app.route('/api/orders/by-customer/<string:customer>', methods=['GET'])
-    @login_required
+    # @login_required
     def get_orders_by_customer(customer: str) -> Response:
         """Route to retrieve all orders by customer.
 
@@ -623,7 +623,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             }), 500)
 
     @app.route('/api/orders/by-completed/<string:completed>', methods=['GET'])
-    @login_required
+    # @login_required
     def get_orders_by_completed(completed: str) -> Response:
         """Route to retrieve all orders by completion status.
 
@@ -653,7 +653,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
 
     @app.route('/api/orders/by-date/<string:order_date_string>', methods=['GET'])
-    @login_required
+    # @login_required
     def get_orders_by_order_date(order_date_string: str) -> Response: # should i make this a datetime object instead?
         """Route to retrieve all orders by order date.
 
@@ -683,7 +683,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             return make_response(jsonify({"status": "error", "message": "Internal server error"}), 500)
 
     @app.route('/api/update-order/<int:order_id>', methods=['PATCH']) 
-    @login_required
+    # @login_required
     def update_order(order_id: int) -> Response:
         """Route to update a order by ID.
 
@@ -771,7 +771,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
             }), 500)
 
     @app.route('/api/delete-order-by-customer/<string:customer>', methods=['DELETE'])
-    @login_required
+    # @login_required
     def delete_order_by_customer(customer: str) -> Response:
         """Route to delete a order by customer.
 
@@ -798,7 +798,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
 
 
     @app.route('/api/delete-order-by-date/<string:order_date_string>', methods=['DELETE'])
-    @login_required
+    # @login_required
     def delete_order_by_date(order_date_string: str) -> Response:
         """Route to delete a order by date.
 
@@ -827,7 +827,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
 
 
     @app.route('/api/delete-order-by-completed/<completed>', methods=['DELETE'])
-    @login_required
+    # @login_required
     def delete_order_by_completed(completed: str) -> Response:
         """Route to delete a order by completed status.
 
@@ -855,7 +855,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
 
     
     @app.route('/api/orders/mark-completed/<int:order_id>', methods=['PATCH'])
-    @login_required
+    # @login_required
     def mark_order_completed(order_id: int):
         """Route to mark an order as completed by the id.
 
@@ -893,7 +893,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
         
 
     @app.route('/api/orders/mark-paid/<int:order_id>', methods=['PATCH'])
-    @login_required
+    # @login_required
     def mark_order_paid(order_id: int):
         """Route to mark an order as paid by the id.
 
@@ -931,7 +931,7 @@ def create_app(config_class=ProductionConfig) -> Flask:
         
 
     @app.route('/api/orders/assign-stringer/<int:order_id>', methods=['PATCH'])
-    @login_required
+    # @login_required
     def assign_stringer(order_id: int):
         """Route to assign a stringer to the order with the id given.
 

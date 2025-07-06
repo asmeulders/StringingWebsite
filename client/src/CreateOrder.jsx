@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from "axios";
 
-function Dashboard() {
+function CreateOrder() {
   const [inputs, setInputs] = useState({});
   const baseUrl = "http://localhost:3000/"
   const apiUrl = "http://localhost:5000/api/"
@@ -110,4 +110,4 @@ function Dashboard() {
   )
 }
 
-export default Dashboard
+export default CreateOrder
