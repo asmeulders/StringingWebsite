@@ -22,17 +22,16 @@ function Dashboard() {
 
   return (
     <div className="Dashboard">
-      {/* <header>
+      <header>
         <div class="topbar">
           <a href={ baseUrl }>Racket Tracker</a>
           <a id='loginbutton' href={ baseUrl + "login" }>Login</a>
         </div>
-        <div class="topnav">
-          <a href={ baseUrl + "dashboard" }>Dashboard</a>
-          <a href={ baseUrl + "create-order" }>Create Order</a>
-        </div> 
-      </header> */}
-      
+      </header>
+      <div class="topnav">
+        <a href={ baseUrl + "dashboard" }>Dashboard</a>
+        <a href={ baseUrl + "create-order" }>Create Order</a>
+      </div> 
       <div class="sidenav">
         <a href="#about">About</a>
         <a href="#services">Services</a>
@@ -48,6 +47,10 @@ function Dashboard() {
         </div>
         <a href="#contact">Search</a>
       </div> 
+      <div class='pagecontent'>
+        <p>sduiofhoewi</p>
+      </div>
+      
     </div>
   )
 }
