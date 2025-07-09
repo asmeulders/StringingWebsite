@@ -1,54 +1,76 @@
 import { useState, useEffect } from 'react'
 import axios from "axios";
+import "./App.css"
 
 function Dashboard() {
   const baseUrl = "http://localhost:3000/"
   const apiUrl = "http://localhost:5000/api/"
+  const [open, setOpen] = useState(false);
 
-  var dropdown = document.getElementsByClassName("dropdown-btn");
-  var i;
+  const handleOpen = () => {
+    setOpen(!open);
+  };
 
-  for (i = 0; i < dropdown.length; i++) {
-    dropdown[i].addEventListener("click", function() {
-      this.classList.toggle("active");
-      var dropdownContent = this.nextElementSibling;
-      if (dropdownContent.style.display === "block") {
-        dropdownContent.style.display = "none";
-      } else {
-        dropdownContent.style.display = "block";
-      }
-    });
-  } 
+  const closeDropdown = () => {
+    setOpen(false);
+  }
+
+  const handleDropdownLink = (id) => {
+    console.log(id)
+    closeDropdown()
+    
+  }
+
+
+  //   for (i = 0; i < dropdown.length; i++) {
+  //     dropdown[i].addEventListener("click", function() {
+  //       this.classList.toggle("active");
+  //       var dropdownContent = this.nextElementSibling;
+  //       if (dropdownContent.style.display === "block") {
+  //         dropdownContent.style.display = "none";
+  //       } else {
+  //         dropdownContent.style.display = "block";
+  //       }
+  //     });
+  //   } 
+  // }
+  
 
   return (
     <div className="Dashboard">
       <header>
-        <div class="topbar">
+        <div className="topbar">
           <a href={ baseUrl }>Racket Tracker</a>
           <a id='loginbutton' href={ baseUrl + "login" }>Login</a>
         </div>
       </header>
-      <div class="topnav">
+      <div className="topnav">
         <a href={ baseUrl + "dashboard" }>Dashboard</a>
         <a href={ baseUrl + "create-order" }>Create Order</a>
       </div> 
-      <div class="sidenav">
-        <a href="#about">About</a>
-        <a href="#services">Services</a>
-        <a href="#clients">Clients</a>
-        <a href="#contact">Contact</a>
-        <button class="dropdown-btn">Dropdown
-          <i class="fa fa-caret-down"></i>
-        </button>
-        <div class="dropdown-container">
-          <a href="#">Link 1</a>
-          <a href="#">Link 2</a>
-          <a href="#">Link 3</a>
+      <button className="dropdown-btn" onClick={handleOpen}>Dropdown
+          <i className="fa fa-caret-down"></i>
+      </button>
+      <div className="sidenav">
+        <a href="#about">Temp</a>
+        <div className='dropdown'>
+          <button className="dropdown-btn" onClick={handleOpen}>Stringing
+            <i className="fa fa-caret-down"></i>
+          </button>
+          { open ? (
+            <ul className="dropdown-container">
+              <li className='dropdown-item'>
+                <button id='orders' onClick={() => handleDropdownLink('orders')}>Orders</button>
+              </li>
+              <li className='dropdown-item'>
+                <button id='history' onClick={() => handleDropdownLink('history')}>History</button>
+              </li>
+            </ul>
+          ) : null}
         </div>
-        <a href="#contact">Search</a>
       </div> 
-      <div class='pagecontent'>
-        <p>sduiofhoewi</p>
+      <div className='pagecontent'>
+        {open ? <div>Is Open</div> : <div>Is Closed</div>}
       </div>
       
     </div>
